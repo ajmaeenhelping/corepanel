@@ -8,6 +8,7 @@ return [
     'nav.content'        => 'Kandungan',
     'nav.banners'        => 'Banner',
     'nav.categories'     => 'Kategori',
+    'nav.products'       => 'Produk',
     'nav.pages'          => 'Halaman',
     'nav.demo'           => 'Demo',
     'nav.administration' => 'Pentadbiran',

@@ -12,7 +12,16 @@ $c_flux = array(
 	"id",			"",				"m",		"int",			"0",		"x",
 	"code",			"Code",			"l",		"",				"1",		"%s%",
 	"name",			"Name",			"l",		"",				"1",		"%s%",
+	"__products",	"Products",		"m",		"lc_pcount",	"0",		"x",
 );
+
+// Build per-category product counts, used by the lc_pcount "View (n)" button
+$listname = "pcount";
+$lklist[$listname] = array();
+$rs = mq("SELECT cat_id, COUNT(*) FROM product GROUP BY cat_id");
+while ($r = mfa($rs)) { $lklist[$listname][$r[0]] = $r[1]; }
+
+$lc_link["__products"] = "product.php?cat=#id#";
 ?>
 <?php require_once $lib_base . "mergel.lib"; ?>
 <?php require_once $lib_base . "presql.lib"; ?>

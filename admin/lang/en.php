@@ -9,6 +9,7 @@ return [
     'nav.content'        => 'Content',
     'nav.banners'        => 'Banners',
     'nav.categories'     => 'Categories',
+    'nav.products'       => 'Products',
     'nav.pages'          => 'Pages',
     'nav.demo'           => 'Demo',
     'nav.administration' => 'Administration',
