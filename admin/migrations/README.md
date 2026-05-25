@@ -1,18 +1,28 @@
-This folder contains ordered SQL migration files for the legacy admin panel.
+# CorePanel — SQL migrations
 
-Naming rules:
-- Use a numeric prefix for ordering, e.g. `001_add_new_column.sql`
-- Keep names unique and descriptive
-- Each file may contain multiple valid MySQL statements
+This folder holds ordered SQL migration files for CorePanel. The runner (`admin/migrate.php`) applies any file not yet recorded in `schema_migrations`.
 
-Example:
-- `001_create_example_table.sql`
-- `002_add_banner_description.sql`
+## Naming rules
 
-Run migrations from the project root:
+- Three-digit numeric prefix for ordering: `010_add_new_column.sql`
+- Lowercase, snake_case description after the prefix
+- One concern per file
+- Don't reuse a prefix once committed
+
+## Examples
+
+- `001_create_employee.sql`
+- `002_create_setup.sql`
+- `009_add_language_columns.sql`
+
+## Run
+
+From the project root:
 
 ```bash
 php admin/migrate.php
 ```
 
-The script tracks applied migrations in the `schema_migrations` table.
+The runner creates the `blank` schema if missing, ensures `schema_migrations` exists, then applies pending migrations in order.
+
+See [`../MIGRATION_PLAN.md`](../MIGRATION_PLAN.md) for the full migration strategy and the list of tables required by core libs.

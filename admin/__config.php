@@ -32,16 +32,14 @@ $mce_base_url = "/corepanel/";
 $mce_src_url  = "/tinymce4.8/";
 $lib_base     = "lib/";
 
-$site_email    = "noreply@localhost.com";
-$site_url      = "../admin";
-
 $system_address = "";
 $system_phone   = "";
 
 $enable_audit = array("");
 
+
 $version = 1.2;
 
 // ── Dev / UI toggles ─────────────────────────────────────────────────────────
-$debug_mode        = 1;  // 1 = show PHP errors on screen (dev only, keep 0 in production)
+$debug_mode         = 1;  // 1 = show PHP errors on screen (dev only, keep 0 in production)
 $disable_rightclick = 0;  // 1 = right-click disabled, 0 = right-click allowed

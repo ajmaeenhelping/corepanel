@@ -1,125 +1,142 @@
-# RS Admin Basic
+# CorePanel
 
-This is a legacy PHP/CSS/JS/HTML admin panel skeleton with no modern framework or migrations.
+CorePanel is a legacy-style PHP admin panel paired with a public-facing corporate website at the project root. No framework — raw PHP + MySQL throughout. Renamed from "Blank 4" → **CorePanel**.
 
 ## Project structure
 
-- `admin/` - main PHP app and legacy admin pages
-- `admin/lib/` - shared PHP libraries and page components
-- `admin/__config.php` - database and global configuration
-- `admin/__ajax.php` - legacy AJAX/API entrypoint
-- `admin/__menu.php` - sidebar menu definition and permissions
-- `admin/__settings.php` - global lookup arrays and settings
-- `admin/database.txt` - exported MySQL schema and sample data
-- `admin/db/init.sql` - MySQL initialization SQL for local development
-- `admin/PROJECT_ARCHITECTURE.md` - architecture summary and code flow
-- `admin/MIGRATION_PLAN.md` - migration strategy for the legacy schema
+```
+Basic/
+├── index.php               ← public homepage (Bootstrap 5)
+├── includes/               ← public site header/footer partials
+├── assets/                 ← public CSS, JS, images
+├── uploads/                ← public uploads
+├── config/
+│   ├── config.php          ← shared DB + site config (single source of truth)
+│   ├── common.php          ← standalone public utility functions
+│   └── lang/               ← public-site translations (en/bm/zh)
+├── admin/                  ← CMS / management panel
+│   ├── __config.php        ← admin config (loads config/config.php with local fallback)
+│   ├── __settings.php      ← global lookup arrays
+│   ├── __menu.php          ← sidebar menu + permissions
+│   ├── __ajax.php          ← AJAX/API entrypoint
+│   ├── migrate.php         ← CLI migration runner
+│   ├── migrations/         ← ordered SQL migration files
+│   ├── db/init.sql         ← baseline schema snapshot
+│   ├── lang/               ← admin translations (en/bm/zh)
+│   ├── uploads/            ← admin-side file uploads
+│   ├── phpmyadmin/         ← phpMyAdmin (served on port 8001)
+│   └── lib/                ← shared admin libraries (common.lib, fileupload.lib, etc.)
+└── CLAUDE.md               ← project memory for Claude
+```
+
+## Database
+
+- **Host**: `localhost`
+- **Schema**: `blank`
+- **User**: `root`
+- **Password**: `12345678`
+- **Charset**: `utf8`
+
+Update these in [`config/config.php`](config/config.php) if your local environment differs.
+
+### Tables
+
+| Table | Purpose |
+|-------|---------|
+| `employee` | Admin panel user accounts |
+| `setup` | Global system config (row `id=1` loaded on every admin page) |
+| `banner` | Banner images |
+| `cat` | Categories (used by `itm`) |
+| `page` | CMS static page content |
+| `demo` | Full-featured demo/showcase table |
+| `itm` | Items linked to categories (FK → `cat`) |
+| `email_template` | Email templates used by `sendMail()` |
+| `schema_migrations` | Migration tracking |
 
 ## Local setup
 
 ### Requirements
 
-- PHP installed locally
-- MySQL or MariaDB server available
+- PHP 7.4+ (tested on PHP 8.5)
+- MySQL or MariaDB server
 
-### Prepare the database
-
-Create the `blank` schema and import the initialization SQL from `admin/db/init.sql`.
+### Initialize the database
 
 From the project root:
 
 ```bash
-cd /Users/iqhwanajmaeen/Documents/Codes/RS Admin/Basic
-mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS blank CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-mysql -u root blank < admin/db/init.sql
+php admin/migrate.php
 ```
 
-If your MySQL server uses a password, replace `-p` with the appropriate credentials.
+The runner connects without a DB first, creates `blank` if missing, then applies any pending migrations in `admin/migrations/` (`000_*.sql` → `00N_*.sql`). Applied migrations are tracked in the `schema_migrations` table.
 
-### Configure the app
+If you'd rather load the baseline snapshot directly:
 
-Open `admin/__config.php` and make sure the database settings match your local environment:
-
-```php
-$mysqli_host = "localhost";
-$mysqli_username = "root";
-$mysqli_password = "";
-$mysqli_schema = "blank";
+```bash
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS blank CHARACTER SET utf8 COLLATE utf8_general_ci;"
+mysql -u root -p blank < admin/db/init.sql
 ```
-
-Update these values if you use a different host, user, or password.
 
 ### Run the app locally
 
-Option 1: use PHP built-in server from the project root:
+Two layouts are supported:
 
 ```bash
-cd /Users/iqhwanajmaeen/Documents/Codes/RS Admin/Basic
+# Option A — public site + admin via /admin
+cd "/Users/iqhwanajmaeen/Documents/Codes/RS Admin/Basic"
+php -S localhost:8000
+
+# Option B — admin only (docroot is admin/)
 php -S localhost:8000 -t admin
 ```
 
-Then open `http://localhost:8000` in your browser.
+- Public site: <http://localhost:8000>
+- Admin panel: <http://localhost:8000/admin> (option A) or <http://localhost:8000> (option B)
 
-Option 2: place the `admin/` folder under a local web server document root and browse to `index.php`.
+### Optional: phpMyAdmin
 
-### Optional: use phpMyAdmin
-
-This repo does not ship phpMyAdmin, but you can install it inside `admin/` and serve it from the same PHP server.
-
-1. Download phpMyAdmin from https://www.phpmyadmin.net/downloads/ or use Composer.
-2. Extract it into `admin/phpmyadmin`.
-3. If needed, copy `admin/phpmyadmin/config.sample.inc.php` to `admin/phpmyadmin/config.inc.php` and set the blowfish secret:
-
-```php
-$cfg['blowfish_secret'] = 'replace-with-a-random-string';
-```
-
-4. Run the app server from the project root:
-
-```bash
-php -S localhost:8000 -t admin
-```
-
-5. Open phpMyAdmin in your browser:
-
-```text
-http://localhost:8000/phpmyadmin
-```
-
-Connect using the database settings from `admin/__config.php`:
-
-- Host: `localhost`
-- User: `root`
-- Password: (empty)
-- Database: `blank`
-
-If you prefer a separate port:
+Bundled under `admin/phpmyadmin/`. Serve on its own port:
 
 ```bash
 cd admin/phpmyadmin
 php -S localhost:8001
 ```
 
-Then browse to `http://localhost:8001`.
+Then open <http://localhost:8001> and connect with the credentials from `config/config.php`.
 
-### Migration guidance
+## Admin login
 
-This project now includes a simple PHP CLI migration runner.
+- **Username**: `admin`
+- **Password**: `admin`
+- **Session prefix**: `catmgr_blank3_`
 
-- Use `admin/db/init.sql` as the current schema snapshot.
-- Place ordered SQL files in `admin/migrations/`.
-- Run migrations with:
+Toggles in [`admin/__config.php`](admin/__config.php):
+
+```php
+$debug_mode         = 0;  // 1 = show PHP errors on screen (dev only)
+$disable_rightclick = 1;  // 1 = disable right-click on admin pages
+```
+
+## Migrations
+
+Place ordered SQL files in `admin/migrations/` (e.g. `010_add_audit_columns.sql`) and run:
 
 ```bash
 php admin/migrate.php
 ```
 
-The script creates and tracks applied migrations in `schema_migrations`.
+See [`admin/MIGRATION_PLAN.md`](admin/MIGRATION_PLAN.md) for the migration strategy and [`admin/migrations/README.md`](admin/migrations/README.md) for naming rules.
 
-Use `admin/MIGRATION_PLAN.md` to design your migration strategy and add new SQL files in `admin/migrations/`.
+## Language system
 
-## Notes
+Three languages: English (default), Bahasa Malaysia (`bm`), Simplified Mandarin (`zh`).
 
-- The codebase is legacy and uses direct PHP includes and raw SQL.
-- `admin/db/init.sql` is the base initialization script for the `blank` database.
-- `admin/database.txt` contains an exported schema and sample data.
+- **UI strings** live in `admin/lang/{en,bm,zh}.php` and `config/lang/{en,bm,zh}.php`; access via `t('nav.home')`.
+- **DB content** uses column suffixes (`data`, `data_bm`, `data_zh` on `email_template`, `page`). `$lg` is set automatically by the language loader.
+- Topbar shows **EN · BM · 中** buttons; switching appends `?setlang=bm` / `?setlang=zh` and persists in the session.
+
+## Architecture & deeper docs
+
+- [`admin/PROJECT_ARCHITECTURE.md`](admin/PROJECT_ARCHITECTURE.md) — runtime flow, libs, conventions
+- [`admin/MIGRATION_PLAN.md`](admin/MIGRATION_PLAN.md) — migration strategy
+- [`CLAUDE.md`](CLAUDE.md) — full project memory (paths, patterns, gotchas)
