@@ -1,0 +1,89 @@
+<?php
+if (!isset($init_common)) exit();
+
+$mn_perm = $mn_page = $mn_name = $mn_icon = [];
+for ($i = 0; $i < sizeof($mn_flux); $i += 4) {
+    $mn_perm[] = $mn_flux[$i];
+    $mn_page[] = $mn_flux[$i + 1];
+    $mn_name[] = $mn_flux[$i + 2];
+    $mn_icon[] = $mn_flux[$i + 3];
+}
+
+// Permission check — redirect if current page requires a perm the user lacks
+for ($i = 0; $i < sizeof($mn_page); $i++) {
+    if ($mn_perm[$i] != "" && $mn_page[$i] != "__group" && $this_file == $mn_page[$i] && !get($mn_perm[$i])) {
+        go("login.php");
+    }
+}
+if (isset($req_pm) && !get($req_pm)) { go("login.php"); }
+
+// Render sidebar nav — groups + links
+for ($i = 0; $i < sizeof($mn_page); $i++):
+    // Permission gate (group labels inherit their perm — if perm fails, skip until next group)
+    if ($mn_perm[$i] != "" && !get($mn_perm[$i])) continue;
+
+    if ($mn_page[$i] === "__group"):
+?>
+    <div class="sidebar-group-label"><?= htmlspecialchars(t($mn_name[$i], $mn_name[$i])) ?></div>
+<?php
+    elseif ($mn_page[$i] != ""):
+        $is_active = ($this_file == $mn_page[$i] || (isset($next_file) && $next_file == $mn_page[$i])) ? 'active' : '';
+?>
+    <a class="sidebar-link <?= $is_active ?>" href="<?= $mn_page[$i] ?>">
+        <i class="<?= $mn_icon[$i] ?> icon-div"></i>
+        <span><?= htmlspecialchars(t($mn_name[$i], $mn_name[$i])) ?></span>
+    </a>
+<?php
+    endif;
+endfor;
+?>
+    </nav>
+
+    <!-- Sidebar footer: logged-in user -->
+    <div class="sidebar-footer">
+        <div class="sidebar-user">
+            <div class="user-avatar"><?= strtoupper(substr(get("name"), 0, 1) ?: 'U') ?></div>
+            <div class="user-info">
+                <div class="user-name"><?= htmlspecialchars(get("name")) ?></div>
+                <div class="user-role"><?= htmlspecialchars(get("designation") ?: 'Staff') ?></div>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<!-- Main wrapper -->
+<div class="main-wrapper" id="mainWrapper">
+
+    <!-- Topbar -->
+    <header class="topbar">
+        <div class="topbar-left">
+            <button class="sidebar-toggle" id="sidebarToggle" type="button">
+                <i class="fas fa-bars"></i>
+            </button>
+            <span class="topbar-breadcrumb"><?= htmlspecialchars($page_title ?? '') ?></span>
+        </div>
+        <div class="topbar-right">
+            <!-- Language switcher -->
+            <div class="lang-switcher">
+                <?php
+                $_cur_lang = isset($_SESSION[$session_pfx . 'lang']) ? $_SESSION[$session_pfx . 'lang'] : 'en';
+                $_langs = ['en' => 'EN', 'bm' => 'BM', 'zh' => '中'];
+                foreach ($_langs as $_lc => $_lbl):
+                    $_active = ($_cur_lang === $_lc) ? 'lang-btn active' : 'lang-btn';
+                ?>
+                <a href="?setlang=<?= $_lc ?>" class="<?= $_active ?>"><?= $_lbl ?></a>
+                <?php endforeach; ?>
+            </div>
+            <div class="topbar-divider"></div>
+            <a href="<?= $site_url ?>/setup.php" class="topbar-action">
+                <i class="fas fa-cog"></i><span><?= t('nav.settings') ?></span>
+            </a>
+            <div class="topbar-divider"></div>
+            <a href="<?= $site_url ?>/logout.php" class="topbar-action">
+                <i class="fas fa-sign-out-alt"></i><span><?= t('nav.logout') ?></span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Content area -->
+    <main class="main-content">

@@ -1,0 +1,12 @@
+<form name="fs" id="fs" method="POST" action="<?=$this_file?>">
+	<input type="hidden" name="l_dir" value="<?=$l_dir?>"/>
+	<input type="hidden" name="l_ord" value="<?=$l_ord?>"/>
+	<input type="hidden" name="l_rpp" value="<?=$l_rpp?>"/>
+	<input type="hidden" name="l_pgn" value="<?=$l_pgn?>"/>
+	<input type="hidden" name="s_crit" value="<?=frmp("s_crit")?>"/>
+	<input type="hidden" name="s_filter" value="<?=frmp("s_filter")?>"/>
+	<?php if ($can_d) { ?><input type="hidden" name="del_id" value=""/><?php } ?>
+</form>
+<?php if ($can_a) { ?><form name="fa" method="POST" action="<?=$next_file?>"></form><?php } ?>
+				   <form name="fe" method="POST" action="<?=$next_file?>"><input type="hidden" name="id" value=""/></form>
+<?php if ($can_d) { ?><form name="fd" method="POST" action="<?=$next_file?>"><input type="hidden" name="del_id" value=""/></form><?php } ?>

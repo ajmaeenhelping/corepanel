@@ -1,0 +1,45 @@
+<?php
+	//valid check types: 	int, dbl, chk, alphanum, date, email, phone, url, (datetime - only used for display, no actual checking done)
+	//special check type:   req (required) is a special value that can be pre-fixed with other values (e.g. reqint, reqemail) - NOTE: not applicable for upload
+	//						uq (unique) can pre-fixed with other values for unique checks (e.g. uq, uqemail). note: no support for int & dbl
+	//						note: if req and uq are used together, req must preceed uq. (e.g. requqemail)
+	$error = "";
+	for ($i=0;$i<sizeof($p_check);$i++){
+		$tmperr = "";
+		$uqcheck = 0;
+		$chktype = $p_check[$i];
+		$fldtype = $p_type[$i];
+		$fldval = $p[$p_list[$i]];
+		if ($chktype=="") continue;
+		if (substr($chktype,0,3)=="req") {
+			$chktype = substr($chktype,3);
+			//if ($fldval=="") {$tmperr="cannot be blank.";}
+			if ($fldval=="" && strpos($fldtype,"upload")===false) {$tmperr="cannot be blank.";}
+			//from june/08 onwards, all lkcbo/lkdisplay database int datatypes should be TEXT and not INTEGER
+			//if ($fldval=="0" && strpos($p_type[$i],"lk")!==false && strpos($p_type[$i],"lk")<1) {$tmperr="cannot be blank.";}
+		}
+		if ($tmperr=="" && $fldval=="") continue;
+		if ($tmperr=="") {if (substr($chktype,0,2)=="uq") {$chktype = substr($chktype,2); $uqcheck=1;}}
+		if ($tmperr=="") {
+			if ($chktype=="int") 							{if (!isint($fldval)) 		{$tmperr="must be numerical.";}}
+			if ($chktype=="dbl") 							{if (!isdbl($fldval)) 		{$tmperr="must be numerical.";}}
+			if ($chktype=="chk") 							{if (!chk($fldval)) 		{$tmperr="must be 4-16 characters and alphanumeric only.";}}
+			if ($chktype=="alphanum") 						{if (!isalphanum($fldval)) 	{$tmperr="contains invalid characters.";}}
+			if ($chktype=="date" && $fldtype=="display") 	{if (!isdate(rvd($fldval))) {$tmperr="is invalid.";}}
+			else if ($chktype=="date") 						{if (!isdate($fldval)) 		{$tmperr="is invalid.";}}
+			if ($chktype=="email") 							{if (!isemail($fldval)) 	{$tmperr="is invalid.";}}
+			if ($chktype=="phone") 							{if (!isphone($fldval)) 	{$tmperr="is invalid.";}}
+			if ($chktype=="url") 							{if (!isurl($fldval)) 		{$tmperr="is invalid.";}}
+		}
+		if ($tmperr=="" && $uqcheck) {
+			$qt = ($chktype=="int" || $chktype=="dbl" ? "":"'");
+			$sql = "SELECT ".$p_list[$i]." FROM ".$sql_table." WHERE ".$p_list[$i]."=".$qt.$fldval.$qt." ".($id=="" ? "":"AND id<>".$id);
+			$rs = mq($sql);
+			if (mnr($rs)>0) $tmperr="already exists.";
+		}
+		$tmplbl = $p_name[$i];
+		if (strpos($tmplbl,"<br")!==false) {$tmplbl = substr($tmplbl,0,strpos($tmplbl,"<br"));}
+		if ($tmperr!="") {$error.=epfx($error,$tmplbl." ".$tmperr);}
+	}
+	$validated = ($error=="" ? 1:0);
+?>

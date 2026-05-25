@@ -1,0 +1,17 @@
+
+<?php
+	$p_list = array();		//table column names
+	$p_name = array();		//display label
+	$p_type = array();		//(refer frmfield.php)
+	$p_check = array();		//int, dbl, chk, alphanum, date, email, phone
+	$p_key = array();		//reverse index keys for attributes
+
+	for ($i=0;$i<sizeof($p_flux);$i+=4){
+		$idx = sizeof($p_list);
+		$p_list[$idx] = $p_flux[$i];
+		$p_name[$idx] = $p_flux[$i+1];
+		$p_type[$idx] = $p_flux[$i+2];
+		$p_check[$idx] = $p_flux[$i+3];
+		$p_key[$p_flux[$i]]=$idx;
+	}
+?>

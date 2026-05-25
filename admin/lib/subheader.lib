@@ -1,0 +1,18 @@
+<!-- Page header -->
+<div class="page-header">
+    <h1 class="page-title"><?= htmlspecialchars($page_title ?? '') ?></h1>
+</div>
+
+<!-- Main form wrapping all content -->
+<form name="f" method="post" action="<?= $this_file ?>" <?= (isset($multipart) && $multipart ? 'enctype="multipart/form-data"' : '') ?>>
+<?php
+$form_id = rnd(16);
+set("form_id", $form_id);
+?>
+<input type="hidden" name="form_id"  value="<?= $form_id ?>">
+<input type="hidden" name="nosubmit" id="nosubmit" value="">
+
+<?php require_once "notification.lib"; ?>
+
+<div class="content-wrap">
+<table class="dtt" width="100%" cellspacing="0" cellpadding="4">

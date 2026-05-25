@@ -1,0 +1,25 @@
+	<tr><td>
+		<table width="100%">
+		<?php
+			if ($form_method_lenient) {$s_crit=frm("s_crit"); $s_filter=frm("s_filter");}
+			else {$s_crit=frmp("s_crit"); $s_filter=frmp("s_filter");}
+			if ($s_crit!="" && $s_filter!="" && $c_type[$s_crit]=="bool") {$s_filter=(cbool($s_filter) ? "Yes":"No");}
+		?>
+		<tr><td class="l font-m"><b>Search by&nbsp;</b></td>
+			<td><select name="s_crit" onchange="updateFilter(); gebi('s_filter').select();" style="width: 100%;">
+				<?php
+					for ($j=0;$j<sizeof($c_list);$j++){
+						if ($c_search[$j]=="x") {continue;}
+						?><option value="<?=$j?>" <?=($s_crit==$j ? "selected":"")?>><?=$c_name[$j]?></option><?php
+					}
+				?>
+				</select>
+			</td>
+			<td><input id="s_filter" name="s_filter" type="text" size="35" onchange="updateFilter();" onfocus="this.select();" value="<?=$s_filter?>">
+				<input type="button" name="submit" value=" Go " onclick="document.fs.submit();" class="btn-1 bg-primary">
+				<input type="button" name="showAll" value="Show All" onclick="showFull();" class="btn-1 bg-secondary">
+			</td>
+		</tr>
+		</table>
+	</td>
+<tr><td>&nbsp;

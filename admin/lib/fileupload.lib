@@ -1,0 +1,118 @@
+<?php
+		/*
+		if ($validated){
+			$upload_path = "ul_image";
+			$target_field = "image";
+			$upload_label = "Photo";
+
+			//$maxFileSize = 1024*1024*1;
+			//$maxFileSizeStr = "1MB";
+			//$acceptUploadExt = array("doc","rtf","pdf","txt");
+			//$uploadFolderPrefix = "cv/";
+			$maxFileSize = 1024*100;
+			$maxFileSizeStr = "100kb";
+			$acceptUploadExt = array("jpg","gif","png");
+			$uploadFolderPrefix = "products/";
+
+			//(optional)
+			$randomizeName = 1;
+			$thumbnail = 1;		//warning: cannot accept .gif!
+			$thumb_w = 100;
+			$thumb_h = 100;
+			$uploadThumbPrefix = "products_/";
+
+			require "__fileupload.php";
+			if ($error!="") {$validated=0;}
+		}
+		*/
+			if (!function_exists("createthumb")) {
+				function createthumb($imagepath,$thumbpath,$new_w,$new_h){
+					$system=explode('.',$imagepath);
+					$fileExt = strtolower(substr($imagepath,strrpos($imagepath,".")+1));
+					if (preg_match('/jpg|jpeg/',$fileExt)) {$src_img=imagecreatefromjpeg($imagepath);}
+					if (preg_match('/png/',$fileExt)) {$src_img=imagecreatefrompng($imagepath);}
+					$old_x=imageSX($src_img);
+					$old_y=imageSY($src_img);
+
+					if ($old_x<=$new_w && $old_y<=$new_h) {
+						copy($imagepath,$thumbpath);
+						imagedestroy($src_img);
+					}
+					else {
+						if ($old_x>$old_y) {$thumb_w=$new_w; $thumb_h=$old_y/($old_x/$new_w);}
+						else if ($old_x<$old_y) {$thumb_h=$new_h; $thumb_w=$old_x/($old_y/$new_h);}
+						else if ($old_x==$old_y) {$thumb_w=$new_w; $thumb_h=$new_h;}
+
+						$dst_img=ImageCreateTrueColor($thumb_w,$thumb_h);
+						imagecopyresampled($dst_img,$src_img,0,0,0,0,$thumb_w,$thumb_h,$old_x,$old_y);
+
+						if (preg_match("/png/",$system[1])) {imagepng($dst_img,$thumbpath);} else {imagejpeg($dst_img,$thumbpath);}
+						imagedestroy($dst_img);
+						imagedestroy($src_img);
+					}
+				}
+			}
+
+			if (is_uploaded_file($_FILES[$upload_path]['tmp_name'])) {
+    			$fileName = $_FILES[$upload_path]['name'];
+    			$fileExt = strtolower(substr($fileName,strrpos($fileName,".")+1));
+    			$filePfx = strtolower(substr($fileName,0,strrpos($fileName,".")));
+    			if ($_FILES[$upload_path]['size'] > $maxFileSize) {
+    				$error.=epfx($error,$upload_label." uploaded file size is too large (max ".$maxFileSizeStr.").");
+    				unlink($_FILES[$upload_path]['tmp_name']);}
+    			else{
+    				$extOK=0;
+    				$acceptUploadStr="";
+    				for ($i=0;$i<sizeof($acceptUploadExt);$i++) {
+    					$acceptUploadStr.=($acceptUploadStr=="" ? "":", ").strtoupper($acceptUploadExt[$i]);
+    					if (strtoupper($acceptUploadExt[$i])==strtoupper($fileExt)) {$extOK=1; break;}
+    				}
+    				if (!$extOK) {
+    					$error.=epfx($error,$upload_label." only ".$acceptUploadStr." allowed (uploaded: ".$fileExt.").");
+        				unlink($_FILES[$upload_path]['tmp_name']);
+    				}
+    				else{
+						if (!isset($uploadThumbPrefix)) {$uploadThumbPrefix=$uploadFolderPrefix;}
+						$imagepath="";
+						$thumbpath="";
+
+						// $uploadAbsolutePrefix = absolute path for file writes (optional).
+						// Falls back to $uploadFolderPrefix when not set.
+						// This allows storing a relative path in the DB while writing
+						// to the correct absolute location on disk.
+						$_writePrefix = isset($uploadAbsolutePrefix) ? $uploadAbsolutePrefix : $uploadFolderPrefix;
+						$_writeThumbPrefix = isset($uploadAbsolutePrefix) ? $uploadAbsolutePrefix : $uploadThumbPrefix;
+
+						if (isset($randomizeName) && $randomizeName) {
+							$lpcount=0;
+							while ($lpcount<50){
+								$rnd=rnd(16);
+								$imagepath=$uploadFolderPrefix.$rnd.".".$fileExt;
+								$_writepath=$_writePrefix.$rnd.".".$fileExt;
+								$thumbpath=$uploadThumbPrefix.$rnd."_.".$fileExt;
+								$_writethumb=$_writeThumbPrefix.$rnd."_.".$fileExt;
+
+								$lpcount++;
+								if (!file_exists($_writepath)) {break;}
+							}
+						}
+						else {
+							$imagepath=$uploadFolderPrefix.$filePfx.".".$fileExt;
+							$_writepath=$_writePrefix.$filePfx.".".$fileExt;
+							$thumbpath=$uploadThumbPrefix.$filePfx."_.".$fileExt;
+							$_writethumb=$_writeThumbPrefix.$filePfx."_.".$fileExt;
+						}
+
+						$p[$target_field] = $imagepath;
+						copy($_FILES[$upload_path]['tmp_name'],$_writepath);
+   						unlink($_FILES[$upload_path]['tmp_name']);
+
+   						if (isset($thumbnail) && $thumbnail) {
+   							$thumb_w = (isset($thumb_w) ? $thumb_w:100);
+   							$thumb_h = (isset($thumb_h) ? $thumb_h:100);
+   							createthumb($_writepath,$_writethumb,$thumb_w,100);
+   						}
+    				}
+    			}
+			}
+?>

@@ -1,0 +1,307 @@
+<?php
+/* supported types:
+	 * - (blank)/hidden		hidden
+	 * - split_[m]			formsplit				(x=align)					e.g. split_m
+	 * - display			label												e.g. display
+	 * - lkdisplay_x		label(lookup)	 		(x=listname)				e.g. lkdisplay_mylist1
+	 * - text_x				text 					(x=size[20])				e.g. text, 	text_20
+	 * - textx_x			text(insert)	 		(x=size[20])				e.g. textx, textx_20
+	 * - pwd_x				password 				(x=size[20])				e.g. pwd, 	pwd_20
+	 * - memo_x_y			textarea				(x=rows[5], y=cols[50])		e.g. memo, 	memo_5_20
+	 * - memox_x_y			textarea(insert)		(x=rows[5], y=cols[50])		e.g. memox, memox_5_20
+	 * - cbx_[1]			checkbox				(1=checked) 				e.g. cbx, 	cbx_1
+	 * - cbxx_[1]			checkbox(insert)		(1=checked) 				e.g. cbxx, 	cbxx_1
+	 * - cbx2_[1]			checkbox				(1=checked) 				e.g. cbx2, 	cbx2_1
+	 * - cbxx2_[1]			checkbox(insert)		(1=checked) 				e.g. cbxx2, cbxx2_1
+	 * - cbo_x_x_...		combobox				(x=items)					e.g. cbo_Apple_Banana_Cake
+	 * - lkcbo_x			combobox(lookup)		(x=listname)				e.g. lkcbo_lklist1
+	 * - lkcbox_x			combobox(lookup,insert)	(x=listname)				e.g. lkcbox_lklist1
+	 * - rad_x_x_...		radio					(x=items)					e.g. rad_Apple_Banana_Cake
+	 * - time_[now]         time                    (now=current time)          e.g. time, time_now
+ 	 * - timex_[now]        time(insert)            (now=current time)  		e.g. timex, timex_now
+	 * - date_[today]		date					(today=current date)		e.g. date, date_today
+	 * - datex_[today]		date(insert)			(today=current date)		e.g. datex, datex_today
+	 * - upload_z_x_y		upload					(z=image/media/blank)		e.g. upload_image_100_100, upload_media_300_300, upload
+	 * - uploadx_z_x_y		upload(insert)			(z=image/media/blank)		e.g. uploadx_image_100_100, uploadx_media_300_300, uploadx
+	 * - cms				content					(x=rows[5], y=cols[50])		e.g. cms
+	 */
+
+/* supported custom configs:
+	 * - $pre_fld[fld]			insert codes before fld tag
+	 * - $post_fld[fld]			insert codes after fld tag
+	 * - $js_func[fld]			insert codes within fld tag (possibly javascript)
+	 * - $ajax_fld[fld]			insert span before fld tag (for ajax response)
+	 * - $skip_label[fld]		skip front back row/cell tag
+	 * - $skip_label_l[fld]		skip front row/cell tag
+	 * - $skip_label_r[fld]		skip front row/cell tag
+	 * - $cal_unlock_date[fld]	makes input field editable (should apply manual validation)
+	 * - $cbo_noblank[fld]		skips cbo 1st blank option
+	 */
+
+//--- setup custom configs ---
+
+$ajax_fld_pre = "";
+$ajax_fld_post = "";
+$extra_fld_pre = (isset($pre_fld[$p_list[$i]]) ? " " . $pre_fld[$p_list[$i]] : "");
+$extra_fld_post = (isset($post_fld[$p_list[$i]]) ? " " . $post_fld[$p_list[$i]] : "");
+if ($extra_fld_pre != "") {
+	$extra_fld_pre  = str_replace("#id#", $r[0], $extra_fld_pre);
+	$extra_fld_pre  = str_replace("#encid#", md5($r[0]), $extra_fld_pre);
+	$extra_fld_pre  = str_replace("#value#", $p[$p_list[$i]], $extra_fld_pre);
+}
+if ($extra_fld_post != "") {
+	$extra_fld_post = str_replace("#id#", $r[0], $extra_fld_post);
+	$extra_fld_post = str_replace("#encid#", md5($r[0]), $extra_fld_post);
+	$extra_fld_post = str_replace("#value#", $p[$p_list[$i]], $extra_fld_post);
+}
+
+$js_func_action = "";
+
+if (!isset($mode)) {
+	$mode = "";
+}
+if (!isset($error)) {
+	$error = "";
+}
+
+if ($mode != "v") {
+	if (isset($ajax_fld[$p_list[$i]]) && $ajax_fld[$p_list[$i]] != "") {
+		$ajax_fld_pre = "<span id='" . $ajax_fld[$p_list[$i]] . "'>";
+		$ajax_fld_post = "</span>";
+	}
+	if (isset($js_func[$p_list[$i]]) && $js_func[$p_list[$i]] != "") {
+		$js_func_action = $js_func[$p_list[$i]];
+	}
+}
+
+$skip_lbl = (isset($skip_label[$p_list[$i]]) ? 1 : 0);
+$skip_lbl_l = (isset($skip_label_l[$p_list[$i]]) ? 1 : 0);
+$skip_lbl_r = (isset($skip_label_r[$p_list[$i]]) ? 1 : 0);
+
+$cal_start_dt = (isset($cal_start_date[$p_list[$i]]) ? "start_date = '" . $cal_start_date[$p_list[$i]] . "'" : "");
+$cal_unlock = (isset($cal_unlock_date[$p_list[$i]]) ? "" : "onfocus='blur();'");
+$cbo_blank = (isset($cbo_noblank[$p_list[$i]]) ? "" : "<option value=''>--- Select ---</option>");
+
+//--- begins composing field ---
+
+$field = "";
+if ($skip_lbl || $skip_lbl_l) {
+} else {
+	$field .= "<tr><td width='" . (isset($lbl_width) ? $lbl_width : 150) . "' nowrap class='tdh l'>" . $p_name[$i] . " :&nbsp;<br><br>";
+}
+$field .= $extra_fld_pre . $ajax_fld_pre;
+
+$f_rt = explode("_", $p_type[$i]);
+$f_vl = $p[$p_list[$i]];
+$f_nm = $p_list[$i];
+
+$algr = ((strpos($p_check[$i], "int") !== false || strpos($p_check[$i], "dbl") !== false) ? "class='r'" : "");
+
+if ($f_rt[0] == "" || $f_rt[0] == "hidden") {
+	$field = "<input type='hidden' name='" . $f_nm . "' value='" . $f_vl . "'>";
+} else if ($f_rt[0] == "split") {
+	$field = "<tr><td colspan='2' class='bg-primary white " . (isset($f_rt[1]) && $f_rt[1] != "" ? $f_rt[1] : "m") . "'><b>" . $p_name[$i] . "</tr>";
+} else if ($f_rt[0] == "display") {
+	$f_dsp = $f_vl;
+	if (strpos($p_check[$i], "int") !== false) {
+		$f_dsp = dfi($f_vl);
+	}
+	if (strpos($p_check[$i], "dbl") !== false) {
+		$f_dsp = dfd($f_vl);
+	}
+	if (strpos($p_check[$i], "date") !== false) {
+		$tmp = substr($f_vl, 0, 10);
+		if (isnulldate(rvd($tmp))) {
+			$f_dsp = "-";
+		} else {
+			$f_dsp = sdf($f_vl);
+		}
+	}
+	if (strpos($p_check[$i], "datetime") !== false) {
+		$tmp = substr($f_vl, 0, 10);
+		if (isnulldate(rvd($tmp))) {
+			$f_dsp = "-";
+		} else {
+			$f_dsp = sdtf($f_vl);
+		}
+	}
+	if ($p_check[$i] == "") {
+		$f_dsp = ($f_dsp == "" ? "-" : $f_dsp);
+	}
+	$field .= $f_dsp . "<input type='hidden' name='" . $f_nm . "' id='" . $f_nm . "' value='" . $f_vl . "'>";
+} else if ($f_rt[0] == "lkdisplay") {
+	$field .= $lklist[$f_rt[1]][$f_vl] . "<input type='hidden' id='" . $f_nm . "' name='" . $f_nm . "' value='" . $f_vl . "'>";
+} else if ($f_rt[0] == "text" || $f_rt[0] == "textx") {
+	$f_dsp = $f_vl;
+	if (strpos($p_check[$i], "int") !== false && $error == "") {
+		$f_dsp = dfi($f_vl);
+	}
+	if (strpos($p_check[$i], "dbl") !== false && $error == "") {
+		$f_dsp = dfd($f_vl);
+	}
+	if ($mode == "v" || ($mode == "e" && $f_rt[0] == "textx")) {
+		$field .= $f_dsp . "<input type='hidden' id='" . $f_nm . "' name='" . $f_nm . "' value='" . $f_vl . "'>";
+	} else {
+		$field .= "<input type='text' id='" . $f_nm . "' name='" . $f_nm . "' size='" . (isset($f_rt[1]) ? $f_rt[1] : "20") . "' " . ($algr) . " " . $js_func_action . " onfocus='this.select();' value='" . $f_dsp . "'>";
+	}
+} else if ($f_rt[0] == "pwd") {
+	if ($mode == "v") {
+		$field .= pad("", "*", 8) . "<input type='hidden' id='" . $f_nm . "' name='" . $f_nm . "' value='" . $f_vl . "'>";
+	} else {
+		$field .= "<input type='password' id='" . $f_nm . "' name='" . $f_nm . "' size='" . (isset($f_rt[1]) ? $f_rt[1] : "20") . "' " . $js_func_action . " value='" . $f_vl . "'>";
+	}
+} else if ($f_rt[0] == "memo" || $f_rt[0] == "memox") {
+	if ($mode == "v" || ($mode == "e" && $f_rt[0] == "memox")) {
+		$field .= lnbr($f_vl) . "<input type='hidden' id='" . $f_nm . "' name='" . $f_nm . "' value='" . $f_vl . "'>";
+	} else {
+		$field .= "<textarea id='" . $f_nm . "' name='" . $f_nm . "' rows='" . (isset($f_rt[1]) ? $f_rt[1] : "5") . "' cols='" . (isset($f_rt[2]) ? $f_rt[2] : "50") . "' " . $js_func_action . " onfocus='this.select();'>" . $f_vl . "</textarea>";
+	}
+} else if ($f_rt[0] == "cbx" || $f_rt[0] == "cbxx") {
+	if ($mode == "v" || ($mode == "e" && $f_rt[0] == "cbxx")) {
+		$field .= "<img src='" . $img_base . ($f_vl ? "on.gif" : "off.gif") . "'/><input type='hidden' id='" . $f_nm . "' name='" . $f_nm . "' value='" . $f_vl . "'>";
+	} else {
+		$field .= "<input type='checkbox' id='" . $f_nm . "' name='" . $f_nm . "' " . $js_func_action . " " . ($f_vl ? "checked" : (isset($f_rt[1]) && $f_rt[1] && $id == 0 ? "checked" : "")) . ">";
+	}
+} else if ($f_rt[0] == "cbx2" || $f_rt[0] == "cbxx2") {
+	if ($mode == "v" || ($mode == "e" && $f_rt[0] == "cbxx2")) {
+		$field = "<tr><td><td style='padding:5px 5px 5px 5px'><img src='" . $img_base . ($f_vl ? "on.gif" : "off.gif") . "'/><input type='hidden' id='" . $f_nm . "' name='" . $f_nm . "' value='" . $f_vl . "'> " . $p_name[$i];
+	} else {
+		$field = "<tr><td class='tdh'><td style='padding:5px 5px 5px 5px'>" . $ajax_fld_pre . "<input type='checkbox' id='" . $f_nm . "' name='" . $f_nm . "' " . $js_func_action . " " . ($f_vl ? "checked" : (isset($f_rt[1]) && $f_rt[1] && $id == 0 ? "checked" : "")) . "> " . $p_name[$i];
+	}
+} else if ($f_rt[0] == "cbo") {
+	if ($mode == "v") {
+		$field .= $f_vl . "<input type='hidden' id='" . $f_nm . "' name='" . $f_nm . "' value='" . $f_vl . "'>";
+	} else {
+		$field .= "<select id='" . $f_nm . "' name='" . $f_nm . "' " . $js_func_action . ">" . $cbo_blank;
+		for ($j = 1; $j < sizeof($f_rt); $j++) {
+			$field .= "<option value='" . $f_rt[$j] . "' " . ($f_vl == $f_rt[$j] ? "selected" : "") . ">" . $f_rt[$j] . "</option>";
+		}
+		$field .= "</select>";
+	}
+} else if ($f_rt[0] == "lkcbo" || $f_rt[0] == "lkcbox") {
+	$l_nm = $f_rt[1];
+	if ($mode == "v" || ($mode == "e" && $f_rt[0] == "lkcbox")) {
+		$field .= (isset($lklist[$l_nm][$f_vl]) ? $lklist[$l_nm][$f_vl] : "") . "<input type='hidden' id='" . $f_nm . "' name='" . $f_nm . "' value='" . $f_vl . "'>";
+	} else {
+		$field .= "<select id='" . $f_nm . "' name='" . $f_nm . "' " . $js_func_action . ">" . $cbo_blank;
+		$lkkey = array_keys($lklist[$l_nm]);
+		for ($j = 0; $j < sizeof($lkkey); $j++) {
+			if ($lklist[$l_nm][$lkkey[$j]] == "") continue;
+			$field .= "<option value='" . $lkkey[$j] . "' " . ($f_vl == $lkkey[$j] ? "selected" : "") . ">" . $lklist[$l_nm][$lkkey[$j]] . "</option>";
+		}
+		$field .= "</select>";
+	}
+} else if ($f_rt[0] == "rad") {
+	if ($mode == "v") {
+		$field .= $f_vl . "<input type='hidden' id='" . $f_nm . "' name='" . $f_nm . "' value='" . $f_vl . "'>";
+	} else {
+		for ($j = 1; $j < sizeof($f_rt); $j++) {
+			$field .= "<label style='cursor:pointer'><input id='" . $f_nm . $j . "' name='" . $f_nm . "' type='radio' " . $js_func_action . " value='" . $f_rt[$j] . "' " . ($f_vl == $f_rt[$j] ? "checked" : ($f_vl == "" && $j == 0 ? "checked" : "")) . ">" . $f_rt[$j] . "</label>&nbsp; &nbsp;";
+		}
+	}
+} 
+else if ($f_rt[0] == "time" || $f_rt[0] == "timex") {
+    if ($mode == "v" || ($mode == "e" && $f_rt[0] == "timex")) {
+        $field .= $f_vl . "<input type='hidden' id='" . $f_nm . "' name='" . $f_nm . "' value='" . $f_vl . "'>";
+    } else {
+        if (isset($f_rt[1]) && $f_rt[1] == "") {
+            $f_rt[1] = "HH:ii";
+        } else if ($mode == "a" && isset($f_rt[1]) && strpos($f_rt[1], "now") !== false) {
+            $f_vl = date('H:i');
+        }
+        $field .= "<input style='font-size: 12px;color: #303030;font-family: Arial;padding: 9px;border-radius: 8px' type='time' id='" . $f_nm . "' name='" . $f_nm . "' size='" . (isset($f_rt[1]) ? $f_rt[1] : "20") . "' " . $js_func_action . " value='" . $f_vl . "'/>";
+    	
+		if (strpos($p_check[$i], "req") === false) {
+			$field .= "&nbsp; <input type='button' class='btn-3 bgred' value='Clear' onclick=\"this.form." . $f_nm . ".value=''\">";
+		}
+	}
+}
+else if ($f_rt[0] == "date" || $f_rt[0] == "datex") {
+	if ($mode == "v" || ($mode == "e" && $f_rt[0] == "datex")) {
+		$field .= (isnulldate($f_vl) ? "-" : $f_vl) . "<input type='hidden' id='" . $f_nm . "' name='" . $f_nm . "' value='" . $f_vl . "'>";
+	} else {
+		if (isset($f_rt[1]) && $f_rt[1] == "") {
+		} else if ($mode == "a" && isset($f_rt[1]) && strpos($f_rt[1], "today") !== false) {
+			$f_vl = rvd(date('Y-m-d'));
+		} else if ($mode == "a" && isset($f_rt[1]) && $f_rt[1] != "") {
+			$f_vl = "'" . rvd($f_rt[1]) . "'";
+		}
+
+		$field .= "<input type='text' id='" . $f_nm . "' name='" . $f_nm . "' size='10' " . $js_func_action . " value='" . (isnulldate($f_vl) ? "" : $f_vl) . "' " . $cal_unlock . " " . $noauto . " />&nbsp; ";
+		$field .= "<dlcalendar click_element_id='img_" . $f_nm . "' input_element_id='" . $f_nm . "' date_format='dd-mm-yyyy' firstday='Su' tool_tip='Click to select date' " . $cal_start_dt . "></dlcalendar>";
+		$field .= "<img align='middle' id='img_" . $f_nm . "' src='" . $img_base . "calendar.gif' height='13' width='13' alt='calendar' onclick=\"gebi('" . $f_nm . "').focus();\" style='cursor:pointer;'>";
+		if (strpos($p_check[$i], "req") === false) {
+			$field .= "&nbsp; <input type='button' class='btn-3 bgred' value='Clear' onclick=\"this.form." . $f_nm . ".value=''\">";
+		}
+	}
+} else if ($f_rt[0] == "upload" || $f_rt[0] == "uploadx") {
+	$field .= "Current : &nbsp;";
+	if ($f_vl == "") {
+		$field .= "(none)";
+	} else {
+		if ($f_rt[1] == "image") {
+			$field .= "<img src='" . $f_vl . "' " . (isset($f_rt[2]) && $f_rt[2] != "" ? "width='" . $f_rt[2] . "'" : "") . " " . (isset($f_rt[3]) && $f_rt[3] != "" ? "height='" . $f_rt[3] . "'" : "") . "/>";
+		} else if ($f_rt[1] == "media") {
+			$field .= "<embed src='" . $f_vl . "' autostart='false' width='" . (!isset($f_rt[2]) || $f_rt[2] == "" ? "250" : $f_rt[2]) . "' height='" . (!isset($f_rt[2]) || $f_rt[3] == "" ? "25" : $f_rt[3]) . "'/>";
+		} else {
+			$field .= "<a href='" . $f_vl . "' target='_blank'><b>[View]</b></a>";
+		}
+	}
+
+	if ($mode == "v" || ($mode == "e" && $f_rt[0] == "uploadx")) {
+		$field .= "<input type='hidden' name='" . $f_nm . "' value='" . $f_vl . "'>";
+	} else {
+		if ($f_vl != "") {
+			$field .= "&nbsp; <b id='ulrm_" . $f_nm . "'><a href='javascript:void(0);' onclick=\"gebi('ulrm_" . $f_nm . "').innerHTML='[To Remove]'; gebi('" . $f_nm . "').value='';\">[Remove]</a></b>";
+		}
+		$field .= "<br><input type='file' id='ul_" . $f_nm . "' name='ul_" . $f_nm . "' size='50'>";
+		$field .= "<input type='hidden' id='" . $f_nm . "' name='" . $f_nm . "' value='" . $f_vl . "'>";
+	}
+} else if ($f_rt[0] == "cms" || $f_rt[0] == "cmsx") {
+	if ($mode == "v" || ($mode == "e" && $f_rt[0] == "cmsx")) {
+		$field .= stripslashes($f_vl) . "<input type='hidden' id='" . $f_nm . "' name='" . $f_nm . "' value='" . $f_vl . "'>";
+	} else {
+		if (isset($mce_init) && $mce_init != "") {
+		} else {
+			$mce_init = '
+				    selector: "textarea[cms]",
+					file_browser_callback: function(field_name, url, type, win) {
+					    window.open("flookup.php");
+					},
+				    theme: "modern",
+				    width: 740,
+				    height: 400,
+				    plugins: [
+				         "advlist autolink link image lists charmap print preview hr anchor pagebreak code",
+				         "searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking",
+				         "save table contextmenu directionality emoticons paste textcolor"
+				   ],
+				   content_css: "../css/styles.css",
+				   toolbar: "insertfile undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | print preview media fullpage | forecolor backcolor emoticons | code",
+				';
+?>
+			<script language="javascript" type="text/javascript" src="<?= $mce_src_url ?>/tinymce.js"></script>
+			<script language="javascript" type="text/javascript">
+				tinymce.init({
+					<?= $mce_init ?>
+				});
+			</script>
+<?php
+		}
+		$field .= "<textarea cms id='" . $f_nm . "' name='" . $f_nm . "' rows='" . (isset($f_rt[1]) ? $f_rt[1] : "5") . "' cols='" . (isset($f_rt[2]) ? $f_rt[2] : "40") . "' " . $js_func_action . " onfocus='this.select();'>" . stripslashes($f_vl) . "</textarea>";
+	}
+}
+
+$field .= $ajax_fld_post . $extra_fld_post;
+if ($skip_lbl || $skip_lbl_r) {
+} else {
+	$field .= "</td></tr>";
+}
+$skip_lbl = 0;
+$skip_lbl_l = 0;
+$skip_lbl_r = 0;
+
+echo $field;
+
+//--- end composing field ---
+?>

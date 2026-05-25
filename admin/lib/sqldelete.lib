@@ -1,0 +1,18 @@
+<?php
+	$del_id = clean(frmp("del_id"));
+	if ($del_id!="" && $can_d && isint($del_id)){
+		$del_codes = "";
+		$sql = "SELECT ".$edit_column." FROM ".$sql_table." WHERE id IN (".$del_id.")";
+		$rs = mq($sql);
+		while ($r=mfa($rs)) {$del_codes.=($del_codes=="" ? "":",").$r[0];}
+		if ($del_codes!="") {
+			if (isset($log_audit["d"]) && $log_audit["d"]) {$log_info = "DELETE ".$sql_table." (".$del_codes.")"; require "auditlog.lib";}
+
+			$sql = "DELETE FROM ".$sql_table." WHERE id IN (".$del_id.")";
+			if (isset($debug_delete) && $debug_delete==1) {echo $sql; exit;}
+			mq($sql);
+			$l_pgn=1;
+			set("update","Record(s) successfully deleted");
+		}
+	}
+?>

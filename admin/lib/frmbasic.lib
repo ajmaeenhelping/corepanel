@@ -1,0 +1,8 @@
+<tr><td width="100%">
+	<table class="innerrow" width="100%" cellpadding="10" cellspacing="0">
+	<?php
+		require $lib_base."frmmode.lib";
+		for ($i=0;$i<sizeof($p_list);$i++) {require $lib_base."frmfield.lib";}
+		require $lib_base."frmaction.lib";
+	?>
+	</table>

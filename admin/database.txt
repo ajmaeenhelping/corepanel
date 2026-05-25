@@ -1,0 +1,344 @@
+--
+-- Database: `blank`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `banner`
+--
+
+CREATE TABLE `banner` (
+  `id` int(11) NOT NULL DEFAULT 0,
+  `name` mediumtext NOT NULL,
+  `image` mediumtext NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `banner`
+--
+
+INSERT INTO `banner` (`id`, `name`, `image`) VALUES
+(1, 'Banner1', '../uploads/3ums7uxwatpmz637.jpg'),
+(2, 'Banner 2', '../uploads/y1e321aspmhnnat8.jpg');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `cat`
+--
+
+CREATE TABLE `cat` (
+  `id` int(11) NOT NULL DEFAULT 0,
+  `code` text NOT NULL,
+  `name` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `cat`
+--
+
+INSERT INTO `cat` (`id`, `code`, `name`) VALUES
+(1, 'C1', 'Category 1'),
+(2, 'C2', 'Category 2x');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `employee`
+--
+
+CREATE TABLE `employee` (
+  `id` int(11) NOT NULL DEFAULT 0,
+  `usr` text,
+  `pwd` text,
+  `name` text,
+  `designation` text,
+  `last_login` datetime NOT NULL DEFAULT '1970-01-01 00:00:00',
+  `active` int(11) NOT NULL DEFAULT '0',
+  `isadmin` int(11) NOT NULL DEFAULT '0',
+  `info` text,
+  `skey` text
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `employee`
+--
+
+INSERT INTO `employee` (`id`, `usr`, `pwd`, `name`, `designation`, `last_login`, `active`, `isadmin`, `info`, `skey`) VALUES
+(1, 'admin', 'b4e9662fef8c7cb2149f87a439dbdd3f', 'Administrator', 'Administrator', '2022-05-26 16:24:17', 1, 1, '-', 'k6c0nvvbwjnqry9dkwf9fymr8gmjv31u');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `page`
+--
+
+CREATE TABLE `page` (
+  `id` int(11) NOT NULL DEFAULT 0,
+  `name` text NOT NULL,
+  `data` text NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `page`
+--
+
+INSERT INTO `page` (`id`, `name`, `data`) VALUES
+(1, 'home', '<p>sample</p>'),
+(2, 'test', '<p>test</p>');
+
+-- --------------------------------------------------------
+
+CREATE TABLE `setup` (
+  `id` int(11) NOT NULL DEFAULT 0,
+  `num1` int(11) NOT NULL DEFAULT 0,
+  `txt1` text NOT NULL,
+  `primarycolor` text,
+  `secondarycolor` text,
+  `time1` time DEFAULT '00:00:00'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `setup` (`id`, `num1`, `txt1`, `primarycolor`, `secondarycolor`, `time1`) VALUES
+(1, 2, 'example', '#01a0c8', '#00dc9f', '00:00:00');
+
+
+-- phpMyAdmin SQL Dump
+-- version 5.0.4
+-- https://www.phpmyadmin.net/
+--
+-- Host: localhost:3306
+-- Generation Time: May 18, 2024 at 10:58 AM
+-- Server version: 5.7.42-0ubuntu0.18.04.1
+-- PHP Version: 7.4.33
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+--
+-- Database: `blank`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `demo`
+--
+
+CREATE TABLE `demo` (
+  `id` int(11) NOT NULL,
+  `code` text NOT NULL,
+  `name` text NOT NULL,
+  `age` int(11) NOT NULL,
+  `salary` double NOT NULL,
+  `email` text NOT NULL,
+  `url` text NOT NULL,
+  `phone` text NOT NULL,
+  `pwd` text NOT NULL,
+  `alphanum` text NOT NULL,
+  `address` text NOT NULL,
+  `info` text NOT NULL,
+  `dob` date NOT NULL,
+  `dt1` date NOT NULL,
+  `updated` datetime NOT NULL DEFAULT '1970-01-01 00:00:00',
+  `disp` text NOT NULL,
+  `cat1` int(11) NOT NULL,
+  `cat2` int(11) NOT NULL,
+  `cbo1` text NOT NULL,
+  `cbo2` text NOT NULL,
+  `rad1` text NOT NULL,
+  `rad2` text NOT NULL,
+  `cbx1` int(11) NOT NULL,
+  `cbx2` int(11) NOT NULL,
+  `cbx3` int(11) NOT NULL,
+  `cbx4` int(11) NOT NULL,
+  `cbx5` int(11) NOT NULL,
+  `cms1` text NOT NULL,
+  `cms2` longtext NOT NULL,
+  `txt1` text NOT NULL,
+  `txt2` text NOT NULL,
+  `txt3` text NOT NULL,
+  `txt4` text NOT NULL,
+  `txt5` text NOT NULL,
+  `txt6` text NOT NULL,
+  `txt7` text NOT NULL,
+  `txt8` text NOT NULL,
+  `dbl1` double NOT NULL,
+  `dbl2` double NOT NULL,
+  `dbl3` double NOT NULL,
+  `catx` text
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `demo`
+--
+
+INSERT INTO `demo` (`id`, `code`, `name`, `age`, `salary`, `email`, `url`, `phone`, `pwd`, `alphanum`, `address`, `info`, `dob`, `dt1`, `updated`, `disp`, `cat1`, `cat2`, `cbo1`, `cbo2`, `rad1`, `rad2`, `cbx1`, `cbx2`, `cbx3`, `cbx4`, `cbx5`, `cms1`, `cms2`, `txt1`, `txt2`, `txt3`, `txt4`, `txt5`, `txt6`, `txt7`, `txt8`, `dbl1`, `dbl2`, `dbl3`, `catx`) VALUES
+(1, 'CCC', 'sadasdsad', 12, 12.12, 'sam@hotmail.com', 'https://google.com.my', '(123 - 123', 'abc123', 'asd123', 'address', 'information\r\nline 2\r\nline 3', '1950-05-02', '2021-01-21', '2023-12-05 18:14:30', '', 1, 1, 'AAA', '', 'Male', 'Cat', 0, 1, 1, 1, 1, '<p>abc</p>\r\n<p><span style=\"color: #ff0000;\"><strong>def</strong></span></p>', '', '', '', 'aaa', '213213213', 'aasdsadsdsdsaddsadsadsadsadadasd', 'blue', '32 character(s)', 'cpp', 0, 0, 0, 'apple pie'),
+(2, 'Code 2', 'Name 2', 0, 0, 'abc@gmail.com', 'https://google.com', '', '', '', '', '', '1950-01-02', '2020-05-18', '2023-12-05 18:17:33', '', 2, 1, 'BBB', 'EEE', 'Male', '', 0, 0, 0, 0, 0, '<p>asd</p>\r\n<p>asd</p>', '', '', '', '', '', '', '', '', '', 0, 0, 0, 'apple pie'),
+(3, 'EEEEE', 'eeeeee', 22, 0, 'ccc@ccc.com', '', '', '', '', '', '', '2020-05-10', '2020-05-18', '2023-12-05 18:18:21', '', 1, 1, 'CCC', '', 'Male', '', 0, 0, 0, 0, 0, '<p>ddeed</p>', '', '', '', '', '', '', '', '', '', 0, 0, 0, 'apple tart'),
+(4, 'fgh', '234', 0, 0, '', '', '', '', '', 'xdx, sdsds&#039; hjgjgh&quot; , kjkjjkh 2/5, dxd', '', '2020-05-04', '2020-05-18', '2023-12-05 18:46:47', 'A-00004', 1, 2, 'CCC', 'EEE', 'Male', '', 0, 1, 0, 0, 0, '<p>asdsadsadsadsadsad</p>', '', '', '', '', '', '', '', '', '', 0, 0, 0, 'apple pie');
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `demo`
+--
+ALTER TABLE `demo`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `demo`
+--
+ALTER TABLE `demo`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+COMMIT;
+
+--
+-- Indexes for dumped tables
+--
+CREATE TABLE `itm` (
+  `id` int(11) NOT NULL,
+  `cat_id` int(11) NOT NULL,
+  `code` text NOT NULL,
+  `name` text NOT NULL,
+  `qty` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `itm`
+--
+
+INSERT INTO `itm` (`id`, `cat_id`, `code`, `name`, `qty`) VALUES
+(1, 1, 'I100', 'Item A', 33),
+(2, 2, 'I101', 'Item B', 0),
+(3, 1, 'I200', 'Item C', 1000),
+(4, 1, 'I205', 'Item Dx', 0),
+(5, 5, 'I600', 'Item Exx', 331313),
+(6, 4, 'I999', 'Caterpillar', 0),
+(7, 1, 'I988', 'Football', 0),
+(8, 2, 'I876', 'Ice-Cream', 0),
+(9, 1, 'I763', 'Juice', 0),
+(10, 1, 'I663', 'Mattress', 0),
+(13, 5, 'asd', 'asd', 133232),
+(14, 9, 'hgjhgjgj', 'gjghjghj', 666),
+(15, 9, 'asddddd', 'asdjjjjjjj', 22),
+(17, 9, 'der', 'evr', 21),
+(18, 11, 'cpp', 'cplus', 1),
+(19, 11, 'm3', 'mathxxx', 6),
+(20, 1, '7777', 'Seven', 3),
+(21, 1, 'aa', 'aaa', 1),
+(22, 1, 'bbb', 'bbb', 2),
+(23, 1, 'ccc', 'cc', 3),
+(24, 1, 'ddd', 'ddd', 4),
+(27, 1, 'xxx', 'aaa', 111),
+(30, 12, 'test', '111', 222),
+(31, 15, '1234ffff', 'a', 121),
+(33, 15, '1234567890', 'testing', 12),
+(36, 15, 'sads', 'd', 0),
+(37, 1, 'z999', 'pineapple xxx', 222),
+(38, 11, 'dsdsd', 'sds', 23),
+(41, 15, 'dededede', '333', 3),
+(43, 30, 'harun', 'itm_harun', 2);
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `itm`
+--
+ALTER TABLE `itm`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `FK_itm_cat_id` (`cat_id`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `itm`
+--
+ALTER TABLE `itm`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `itm`
+--
+ALTER TABLE `itm`
+  ADD CONSTRAINT `FK_itm_cat_id` FOREIGN KEY (`cat_id`) REFERENCES `cat` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+COMMIT;
+--
+-- Indexes for table `banner`
+--
+ALTER TABLE `banner`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `cat`
+--
+ALTER TABLE `cat`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `employee`
+--
+ALTER TABLE `employee`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `page`
+--
+ALTER TABLE `page`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `setup`
+--
+ALTER TABLE `setup`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `banner`
+--
+ALTER TABLE `banner`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `cat`
+--
+ALTER TABLE `cat`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `employee`
+--
+ALTER TABLE `employee`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `page`
+--
+ALTER TABLE `page`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `setup`
+--
+ALTER TABLE `setup`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;

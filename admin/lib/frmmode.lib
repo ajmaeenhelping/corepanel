@@ -1,0 +1,7 @@
+<?php
+	$mode = "";
+	if ($id!="" && $can_e) {$mode="e";}
+	else if ($id!="" && !$can_e) {$mode="v";}
+	else if ($id=="" && $can_a) {$mode="a";}
+	else {go("login.php");}
+?>

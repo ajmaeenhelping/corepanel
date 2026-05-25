@@ -1,0 +1,21 @@
+<?php
+				$sql = "UPDATE ".$sql_table." SET ";
+				for ($i=1;$i<sizeof($p_list);$i++) {
+					if ($p_list[$i]=="" || substr($p_list[$i],0,2)=="__") continue;
+					$v = $p[$p_list[$i]];
+					if ((strlen($p_type[$i])>=4 && (substr($p_type[$i],0,4)=="date")) || ((strlen($p_type[$i])>=5 && substr($p_type[$i],0,5)=="datex"))) {$v=rvd($v);}
+					if (strpos($p_check[$i],"int")!==false) {$v=cint($v);}
+					if (strpos($p_check[$i],"dbl")!==false) {$v=cdbl($v);}
+
+					$q = "'"; $tmp_no_quote = array("int","dbl","cbx");
+					for ($j=0;$j<sizeof($tmp_no_quote);$j++) {if (strpos($p_type[$i],$tmp_no_quote[$j])!==false && isset($tmp_chk) && strpos($tmp_chk,$tmp_no_quote[$j])<1) $q="";}
+					if ($v=="null") {$q="";}
+
+					$sql.=($i==1 ? "":",").$p_list[$i]."=".$q.(strpos($p_check[$i],"raw")!==false ? asl($v):clean($v)).$q;
+				}
+				$sql.=" WHERE `id`=".$id.";";
+				$action = "updated";
+				if (isset($debug_update) && $debug_update==1) {echo $sql; exit;}
+				$rs_result = mq($sql);
+				if (isset($log_audit["e"]) && $log_audit["e"]) {$log_info = "UPDATE ".$sql_table." (".$p[$edit_column].")"; require "auditlog.lib";}
+?>

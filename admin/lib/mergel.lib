@@ -1,0 +1,20 @@
+<?php
+	$c_list = array();		//table column names
+	$c_name = array();		//display label
+	$c_algn = array();		//l-left, m-middle, r-right
+	$c_type = array();		//int, dbl, bool, memo, sdf, sdtf, sdfnm, stf, lklist_[name]
+	$c_sort = array();		//0-no, 1-yes
+	$c_search = array();	//x-no, s, s%, %s, %s%
+	$c_key = array();		//reverse index keys for attributes
+
+	for ($i=0;$i<sizeof($c_flux);$i+=6){
+		$idx = sizeof($c_list);
+		$c_list[$idx] = $c_flux[$i];
+		$c_name[$idx] = $c_flux[$i+1];
+		$c_algn[$idx] = $c_flux[$i+2];
+		$c_type[$idx] = $c_flux[$i+3];
+		$c_sort[$idx] = $c_flux[$i+4];
+		$c_search[sizeof($c_search)] = $c_flux[$i+5];
+		$c_key[$c_flux[$i]]=$idx;
+	}
+?>

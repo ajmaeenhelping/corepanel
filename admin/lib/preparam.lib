@@ -1,0 +1,13 @@
+<?php
+	for ($i=0;$i<sizeof($p_list);$i++){
+		if (strpos($p_check[$i],"raw")!==false) {$p[$p_list[$i]] = trim(frmr($p_list[$i]));}
+		else {$p[$p_list[$i]] = trim(frmp($p_list[$i]));}
+		if (strpos($p_type[$i],"cbx")!==false)  {$p[$p_list[$i]]=cbx($p[$p_list[$i]]);}
+		if (strpos($p_check[$i],"int")!==false) {if ($p[$p_list[$i]]=="") $p[$p_list[$i]]="0";}
+		if (strpos($p_check[$i],"dbl")!==false) {if ($p[$p_list[$i]]=="") $p[$p_list[$i]]="0.00";}
+	}
+
+	//$submitted = (frmp("submit")!="" && frmp("form_id")==get("form_id") ? 1:0);
+	$submitted = (frmp("submit")!="");
+	set("form_id","");
+?>

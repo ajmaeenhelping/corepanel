@@ -1,0 +1,8 @@
+	<tr><td colspan="2" align="center"><br/>
+		<input type="text" style="display:none"/>
+		<input type="hidden" name="id" value="<?=$id?>"/>
+		<?php if ($mode!="v") { ?>
+			<input type="submit" id="submit" name="submit" class="btn-3 bg-primary" value="  <?=($id=="" ? "Add":"Update")?>  ">
+		<?php } ?>
+		<input type="button" id="cancel" name="cancel" class="btn-3 bgred" value="  <?=($id=="" ? "Cancel":"Close")?>  " onclick="window.location.href='<?=$next_file?>';">
+		<br/>&nbsp;

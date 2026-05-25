@@ -1,0 +1,16 @@
+<?php
+	require_once $lib_base."preparam.lib";
+	$id = $p[$p_list[0]];
+	if($submitted){
+		if (!frmp("nosubmit")){
+			require_once $lib_base."validation.lib";
+			if ($validated){
+				if ($id=="") {require $lib_base."sqlinsert.lib";}
+				else {require $lib_base."sqlupdate.lib";}
+				set("update","Record successfully ".$action);
+				go($next_file);
+			}
+		}
+	}
+	else if ($id!="") {require $lib_base."sqlselect.lib";}
+?>

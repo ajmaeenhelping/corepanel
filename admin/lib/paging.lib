@@ -1,0 +1,51 @@
+		<?php
+			$styc1 = "#6666FF";
+			$styc2 = "#FF0000";
+		?>
+		<table width="100%">
+		<tr>
+			<td><?php if ($can_a) { ?><input type="button" value=" Add " onclick="addNew();" class="btn-4 bg-primary"><?php } ?>	
+				<?php if ($can_d) { ?><input type="button" value="Delete" onclick="delRec();" class="btn-4 bgred"><?php } ?>
+			</td>
+			<td align="right">
+			Page <b><?=($l_pgn)?></b> of <b><?=$l_tpg?></b>
+			<?php if ($l_tpg>1) { ?>
+				: &nbsp;
+				<span style="width:10px">&nbsp;</span>
+				<?php if($l_pgn>1) { ?>
+					<a style="color:<?=$styc1?>" href="javascript:void(0);" onclick="changePage(1);"><img src="<?=$img_base?>left2.gif"/></a>&nbsp;
+					<a style="color:<?=$styc1?>" href="javascript:void(0);" onclick="changePage(<?=$l_pgn-1?>);"><img src="<?=$img_base?>left.gif"/></a>
+					&nbsp;
+				<?php } ?>
+				<?php
+					$pvt_srt = ($l_pgn>6 ? $l_pgn-5:1);
+					$pvt_end = ($pvt_srt+10>$l_tpg ? $l_tpg:$pvt_srt+10);
+					for($i=$pvt_srt;$i<=$pvt_end;$i++) {
+						$ext_style = "text-decoration: underline; ";
+						if ($i==$l_pgn) {$ext_style.="color:".$styc2."; font-weight:bold;";}
+						else {$ext_style.="color:".$styc1.";";}
+						?><a style="<?=$ext_style?>" href="javascript:void(0);" onclick="changePage(<?=$i?>);"><?=$i?></a><?php
+						?>&nbsp;&nbsp;<?php
+					}
+				?>
+				<?php if($l_pgn<$l_tpg) { ?>
+					&nbsp;
+					<a style="color:<?=$styc1?>" href="javascript:void(0);" onclick="changePage(<?=$l_pgn+1?>);"><img src="<?=$img_base?>right.gif"/></a>
+					<a style="color:<?=$styc1?>" href="javascript:void(0);" onclick="changePage(<?=$l_tpg?>);"><img src="<?=$img_base?>right2.gif"/></a>
+				<?php } ?>
+			<?php } ?>
+			<span style="width:30px">&nbsp;</span>
+
+			Display:
+			<select name="rpp" onchange="changeRpp(this.value)">
+			<?php
+				$rpp_list = array("10","20","50","100","200");
+				for ($i=0;$i<sizeof($rpp_list);$i++){
+					?><option value="<?=$rpp_list[$i]?>" <?=($l_rpp==$rpp_list[$i] ? "selected":"")?>><?=$rpp_list[$i]?></option><?php
+				}
+			?>
+			</select>
+			rows &nbsp;
+		</td>
+	</tr>
+	</table>

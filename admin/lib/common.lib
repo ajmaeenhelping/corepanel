@@ -1,0 +1,223 @@
+<?php
+	ini_set('display_errors', (isset($debug_mode) && $debug_mode) ? 'On' : 'Off');
+	ini_set('error_reporting', E_ALL);
+	//ini_set('display_errors','Off');
+	//ini_set('display_errors','Off');
+
+	header('Content-Type: text/html; charset=utf-8');
+	session_start();
+	$init_common = 1;
+	$base2_version = "v3.0.2";
+	require_once "__config.php";
+
+	$db = mysqli_connect($mysqli_host,$mysqli_username,$mysqli_password."", $mysqli_schema) or die("Cannot connect to database.");
+	mysqli_set_charset($db,'utf8');
+	$session_pfx = (isset($session_pfx) ? $session_pfx:$mysqli_schema."_");
+	$mysqli_host = ""; $mysqli_username = ""; $mysqli_password = ""; $mysqli_schema = "";
+
+	require_once "__settings.php";
+	require_once "__menu.php";
+
+	// ── Language loader ──────────────────────────────────────────────────────
+	$_supported_langs = ['en', 'bm', 'zh'];
+	// Handle ?setlang= switch
+	if (isset($_GET['setlang']) && in_array($_GET['setlang'], $_supported_langs)) {
+		$_SESSION[$session_pfx . 'lang'] = $_GET['setlang'];
+	}
+	$_lang_code = (isset($_SESSION[$session_pfx . 'lang']) && in_array($_SESSION[$session_pfx . 'lang'], $_supported_langs))
+		? $_SESSION[$session_pfx . 'lang'] : 'en';
+	$LANG = require_once __DIR__ . "/../lang/" . $_lang_code . ".php";
+	$lg   = ($_lang_code === 'en') ? '' : '_' . $_lang_code;
+
+	$file_psx = "_info";
+	$can_a=(isset($can_a) ? $can_a:1);
+	$can_e=(isset($can_e) ? $can_e:1);
+	$can_d=(isset($can_d) ? $can_d:1);
+
+	//audit
+	$log_audit = array();
+	for ($i=0;$i<sizeof($enable_audit);$i++) {$log_audit[$enable_audit[$i]]="1";}
+
+	//page config
+	$page_width = (isset($page_width) ? $page_width:"760");
+	$report_width = (isset($report_width) ? $report_width:"740");
+	$form_method_lenient = (isset($form_method_lenient) ? $form_method_lenient:0);
+
+	//external files
+	$img_base = (isset($img_base) ? $css_base:$lib_base."img/");
+	$css_base = (isset($css_base) ? $css_base:$lib_base."img/");
+	$js_base = (isset($js_base) ? $js_base:$lib_base."js/");
+	$css_file = array("style.css","fontawesome/css/all.css");
+	$js_file = array("ajax.js","md5.js","script.js");
+	if (!isset($disable_rightclick) || $disable_rightclick) { $js_file[] = "rc.js"; }
+	$js_file_footer = array();
+
+	//session protected pages
+	$this_file = substr($_SERVER['PHP_SELF'],strrpos($_SERVER['PHP_SELF'],"/")+1);
+	if (strpos($this_file,"?")!==false) {$this_file = substr($this_file,0,strpos($this_file,"?"));}
+	$this_name = substr($this_file,0,strlen($this_file)-4);
+	$next_file = (strpos($this_name,$file_psx)!==false ? substr($this_name,0,strlen($this_name)-strlen($file_psx)):$this_name.$file_psx).".php";
+	if (!isset($omit_file)) {$omit_file = array("index.php","login.php","__ajax.php", "api.php", "forgot.php");}
+	if (!in_array($this_file,$omit_file) && get("usr")=="") {go("logout.php");}
+
+	//concurrency checking
+	if (get("id")!=""){$r = mfa(mq("SELECT skey FROM employee WHERE id=".get("id"))); if ($r[0]!=get("skey")) {go("logout.php?error=1");}}
+
+
+if (get("host_domain_confirmed") == "") {
+    if (!isset($host_domain) || $host_domain == "") {
+        echo "<b style='font-family:Arial; font-size:14px'>Hosting domain not specified.</b>";
+        exit;
+    }
+    if (!isset($host_key) || $host_key == "") {
+        echo "<b style='font-family:Arial; font-size:14px'>Host key not specified.</b>";
+        exit;
+    }
+
+
+    // Add condition to bypass locking on localhost
+    if ($host_domain !== "localhost") {
+        $confirmed = 0;
+        $arrdom = explode(",", $host_domain);
+        for ($i = 0; $i < sizeof($arrdom); $i++) {
+            if (strpos(pageurl(), $arrdom[$i]) !== false) {
+                $confirmed = 1;
+                break;
+            }
+        }
+        if (isset($confirmed) && !$confirmed) {
+            echo "<b style='font-family:Arial; font-size:14px'>Hosted domain not allowed.</b>";
+            exit;
+        }
+    }
+    set("host_domain_confirmed", 1);
+}
+
+
+	//form parameters
+	function hsc($s) {return htmlspecialchars($s,ENT_QUOTES);}
+	function frmp($s){if (isset($_POST[$s])) return hsc($_POST[$s]); else return "";}
+	function frmg($s){if (isset($_GET[$s])) return hsc($_GET[$s]); else return "";}
+	function frm($s){if (frmp($s)!="") return frmp($s); else if (frmg($s)!="") return frmg($s); else return "";}
+	function frmr($s){if (isset($_POST[$s])&&$_POST[$s]!="") return $_POST[$s]; else return "";}
+	function clean($s){global $db; return mysqli_real_escape_string($db, stripslashes($s));}
+
+	//miscellany
+	function cbx($s) {return ($s=="on" || $s=="1" ? 1:0);}
+	function rvd($s) {$d="-"; if ($s=="") return ""; $r=explode($d,$s); if (sizeof($r)!=3) return ""; return $r[2].$d.$r[1].$d.$r[0];}
+	function pad($s,$c,$l) {while(strlen($s)<$l) {$s=$c.$s;} return $s;}
+	function xxx($s) {return preg_replace('/[a-zA-Z0-9]/','x',$s);}
+	function rnd($l) {$s="abcdefghjkmnpqrstuvwxyz0123456789"; $p=""; for($i=0;$i<$l;$i++) {$p.=substr($s,rand(0,strlen($s)-1),1);} return $p;}
+	function lnbr($s) {return str_replace("\n","<br/>",$s);}
+	function go($u) {echo "<meta http-equiv='REFRESH' content='0; URL=".$u."'>"; exit();}
+	function pageurl() {return "http".(isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"]=="on" ? "s":"")."://".$_SERVER["SERVER_NAME"].($_SERVER["SERVER_PORT"]!="80" ? ":".$_SERVER["SERVER_PORT"]:"").$_SERVER["REQUEST_URI"];}
+	function genap($s) {$d=$s*100; $m=$d%10; if($m==1||$m==6){$d-=1;} if($m==2||$m==7){$d-=2;} if($m==3||$m==8){$d+=2;} if($m==4||$m==9){$d+=1;} return dfd($d/100);}
+
+	//mysql shortcuts
+	function mq($s) {global $db;return mysqli_query($db, $s);}
+	function mfa($s) {return mysqli_fetch_array($s);}
+	function mnr($s) {return mysqli_num_rows($s);}
+
+	//session handling
+	function set($s,$v) {global $session_pfx; $_SESSION[$session_pfx.$s] = $v;}
+	function get($s) {global $session_pfx; if (isset($_SESSION[$session_pfx.$s])) return $_SESSION[$session_pfx.$s]; else return "";}
+
+	//cookie handling
+	function setc($s,$v) {global $session_pfx; setcookie($session_pfx.$s,$v,(time()+60*60*24*365));}
+	function getc($s) {global $session_pfx; if (isset($_COOKIE[$session_pfx.$s])) return $_COOKIE[$session_pfx.$s]; else return "";}
+
+	//time formating
+	function now() {return date('Y-m-d H:i:s');}
+	function sdf($t) {return date('d-M-Y', strtotime($t));}
+	function sdtf($t) {return date('d-M-Y, h:i a', strtotime($t));}
+	function sdfnm($t) {return date('d-m-Y', strtotime($t));}
+	function stf($t) {return date('h:i a', strtotime($t));}
+	function sdfd($t) {return date('d', strtotime($t));}
+	function sdfm($t) {return date('m', strtotime($t));}
+	function sdfy($t) {return date('Y', strtotime($t));}
+
+	//date manipulation - only accept / return Y-m-d format. e.g. moddate('2008-01-01','+3 day')
+	function moddate($s,$v)  {return date('Y-m-d',strtotime($v,strtotime($s)));}
+
+	//number formating
+	function dfi($s) {return (isint($s) && $s!="" ? number_format(cint($s),0):"0");}
+	function dfd($s) {return (isdbl($s) && $s!="" ? number_format(cdbl($s),2):"0.00");}
+
+	//validation
+	function isalphanum($s) {return !preg_match('/[^a-zA-Z0-9_]/', $s);}
+	function chk($s) {return (strlen($s)>=4 && strlen($s)<=16 && isalphanum($s));}
+	function isdate($s) {$d="-"; if ($s=="") return 0; $r=explode($d,$s); if (sizeof($r)!=3) return 0; if (!isint($r[1])) {$r[1]=date('m',strtotime('2020-'.$r[1].'-01'));} return checkdate($r[1],$r[0],$r[2]);}
+	function isnulldate($s) {return (!isset($s) || $s=="" || $s=="00-00-0000" || $s=="0000-00-00" || $s=="00-00-0000 00:00:00" || $s=="0000-00-00 00:00:00" || $s=="1970-01-01" || $s=="1970-01-01 00:00:00" || $s=="01-01-1970" || $s=="01-01-1970 00:00:00");}
+	function isemail($s) {$r="/^[^0-9][_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/";return (preg_match($r, $s));}
+	function isphone($s) {return !(preg_match('/[^0-9()\- ]/', $s));}
+	function isurl($s) {return preg_match('|^http(s)?://[a-z0-9-]+(.[a-z0-9-]+)*(:[0-9]+)?(/.*)?$|i',$s);}
+	//function isurl($s) {return preg_match('|^[a-z0-9-]+(.[a-z0-9-]+)*(:[0-9]+)?(/.*)?$|i',$s);}
+	function isint($s) {return !preg_match('/[^0-9,]/', $s);}
+	function isdbl($s) {return (!preg_match('/[^0-9.,]/', $s) && substr_count($s, ".") < 2);}
+	function cint($s) {return (isint($s) ? trim(str_replace(",","",$s))+0:0);}
+	function cdbl($s) {return (isdbl($s) ? trim(str_replace(",","",$s))+0:0.00);}
+	function cbool($s) {$s=strtolower($s); return (($s=='y'||$s=='yes'||$s=='true'||$s=='1'||$s=='on') ? 1:0);}
+	function asl($s) {return addslashes($s);}
+	function epfx($e,$s) {return (($e!="" ? "<br/>":"")."&#149;&nbsp; ".$s);}
+	function upfx($u,$s) {return (($u!="" ? "<br/>":"")."&#149;&nbsp; ".$s);}
+
+	// Language translation helper
+	function t($key, $fallback = null) {
+		global $LANG;
+		if (is_array($LANG) && isset($LANG[$key])) return $LANG[$key];
+		return $fallback !== null ? $fallback : $key;
+	}
+
+	function sendMail($template, $to = "", $arr = array())
+{
+	global $site_url, $site_email, $site_name, $site_phone, $mailsender, $lg;
+
+	if ($to == '') $to = $site_email;
+
+	$sql = "SELECT * FROM email_template WHERE code = '" . $template . "'";
+	$e = mfa(mq($sql));
+	$rep2 = array(
+		"[[site_url]]" => $site_url,
+		"[[site_name]]" => $site_name,
+		"[[site_email]]" => $site_email,
+		"[[site_phone]]" => $site_phone,
+		"[[mail_heading]]" => $e["heading" . $lg],
+		"[[now]]" => now(),
+	);
+	$rep = array_merge($rep2, $arr);
+
+	foreach ($rep as $key => $value) {
+		$e["heading" . $lg] = str_replace($key, $value, $e["heading" . $lg]);
+		$e["data" . $lg] = str_replace($key, $value, $e["data" . $lg]);
+	}
+	foreach ($rep as $key => $value) {
+		$e["heading" . $lg] = str_replace($key, $value, $e["heading" . $lg]);
+		$e["data" . $lg] = str_replace($key, $value, $e["data" . $lg]);
+	}
+
+	ini_set('sendmail_from', $mailsender);
+	$result = mail(
+		$to,
+		$e['heading' . $lg],
+		$e['data' . $lg],
+		"From: No-Reply <" . $mailsender . ">\r\n" .
+			"Reply-To:" . $site_email . "\r\n" .
+			"Bcc:info@blank.com\r\n" .
+			"Content-Type:text/html\r\n" .
+			"X-Mailer: PHP/" . phpversion()
+	);
+	ini_restore('sendmail_from');
+	return $result;
+}
+
+	$noauto=" autocomplete='new-password' ";
+	$error=""; $update="";
+
+	if($this_file == "login.php"){
+		$login = 1;
+	}else{
+		$login =0;
+	}
+
+	$gen = mfa(mq("SELECT * FROM setup where id = 1"));
+?>

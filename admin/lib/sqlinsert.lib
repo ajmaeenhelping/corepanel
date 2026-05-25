@@ -1,0 +1,37 @@
+<?php
+				$sql = "INSERT INTO ".$sql_table." (";
+				for ($i=1;$i<sizeof($p_list);$i++) {
+					if ($p_list[$i]=="" || substr($p_list[$i],0,2)=="__") continue;
+					$sql.=($i==1 ? "":",").$p_list[$i];
+				}
+				$sql.=") VALUES (";
+				for ($i=1;$i<sizeof($p_list);$i++) {
+					if ($p_list[$i]=="" || substr($p_list[$i],0,2)=="__") continue;
+					$v = $p[$p_list[$i]];
+					$tmp_chk = $p_check[$i];
+					if (substr($tmp_chk,0,3)=="req") {$tmp_chk = substr($tmp_chk,3);}
+					if (substr($tmp_chk,0,2)=="uq") {$tmp_chk = substr($tmp_chk,2);}
+
+					if ((strlen($p_type[$i])>=4 && (substr($p_type[$i],0,4)=="date")) || ((strlen($p_type[$i])>=5 && substr($p_type[$i],0,5)=="datex"))) {$v=rvd($v);}
+					if (strpos($p_check[$i],"int")!==false) {$v=cint($v);}
+					if (strpos($p_check[$i],"dbl")!==false) {$v=cdbl($v);}
+
+					$q = "'"; $tmp_no_quote = array("int","dbl","cbx");
+					for ($j=0;$j<sizeof($tmp_no_quote);$j++) {if (strpos($tmp_chk,$tmp_no_quote[$j])!==false && strpos($tmp_chk,$tmp_no_quote[$j])<1) $q="";}
+					if ($v=="null") {$q="";}
+
+					$sql.=($i==1 ? "":",").$q.clean($v).$q;
+				}
+				$sql.=");";
+				$action = "added";
+				if (isset($debug_insert) && $debug_insert==1) {echo $sql; exit;}
+				$rs_result = mq($sql);
+
+				$sql = "SELECT id,".$edit_column." FROM ".$sql_table." ORDER BY id DESC LIMIT 0,1";
+				$rs = mq($sql);
+				$r = mfa($rs);
+				$new_id = $r[0];
+
+				//turn of $log_audit["a"] for system generated (padded) codes
+				if (isset($log_audit["a"]) && $log_audit["a"]) {$log_info = "INSERT ".$sql_table." (".$r[1].")"; require "auditlog.lib";}
+?>

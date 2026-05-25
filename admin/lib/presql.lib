@@ -1,0 +1,46 @@
+<?php
+	//usage: specify $l_order_by (column name) and/or $l_direction (ASC/DESC) to override default values
+	$l_ord = (frmp("l_ord")!="" ? frmp("l_ord"):(isset($l_order_by) ? $l_order_by:$c_list[1]));
+	$l_dir = (frmp("l_dir")!="" ? frmp("l_dir"):(isset($l_direction) ? $l_direction:"ASC"));
+	$l_rpp = (frmp("l_rpp")!="" ? frmp("l_rpp"):"10");
+	$l_pgn = (frmp("l_pgn")!="" ? frmp("l_pgn"):"1");
+	$sql_order = " ORDER BY ".$l_ord." ".$l_dir;
+	$sql_limit = " LIMIT ".(($l_pgn-1)*$l_rpp).",".$l_rpp;
+
+	//search filter
+	$sql_where = " WHERE ".$c_list[0]."<>-1";
+	if ($form_method_lenient) {$s_crit=frm("s_crit"); $s_filter=frm("s_filter");}
+	else {$s_crit=frmp("s_crit"); $s_filter=frmp("s_filter");}
+	if ($s_crit!="" && $s_filter!=""){
+		$tmp_fld = $c_list[$s_crit];
+		$tmp_search = $c_search[$s_crit];
+		$tmp_type = $c_type[$s_crit];
+		$condition = "";
+
+		if ($tmp_search=="x") 		{}
+		else {
+			if ($tmp_type=="int")		{if (!isint($s_filter)) {$error.=epfx($error,"Input must be numerical");} else {$condition="=".$s_filter;}}
+			else if ($tmp_type=="dbl")		{if (!isdbl($s_filter)) {$error.=epfx($error,"Input must be numerical");} else {$condition="=".$s_filter;}}
+			else if ($tmp_type=="bool")		{$s_filter = cbool($s_filter); if (!isdbl($s_filter)) {$error.=epfx($error, "Input must be Yes or No");} else {$condition="=".$s_filter;}}
+			else if ($tmp_type=="sdf" ||
+					 $tmp_type=="sdtf" ||
+					 $tmp_type=="sdtnm")	{if (!isdate($s_filter)) {$error.=epfx($error,"Invalid input date (DD-MM-YYYY)");} else {$s_filter=date("d-m-Y",strtotime($s_filter)); $condition="='".rvd($s_filter)."'";}}
+			else if (strpos($tmp_type,"lk_")!==false && strpos($tmp_type,"lk_")<1) {
+				$s_arr = ""; $tmp_arr = explode("_",$tmp_type); $l_nm = $tmp_arr[1]; $lkkey=array_keys($lklist[$l_nm]);
+				for ($j=0;$j<sizeof($lkkey);$j++) {if (strpos(strtolower($lklist[$l_nm][$lkkey[$j]]), strtolower($s_filter))!==false) {$s_arr.=",".$lkkey[$j];}}
+				$condition="IN (-1".$s_arr.")";
+			}
+			else if (strpos($tmp_type,"mt_")!==false && strpos($tmp_type,"mt_")<1) {
+				$s_arr = ""; $tmp_arr = explode("_",$tmp_type); $l_nm = $tmp_arr[1]; $lkkey=array_keys($lklist[$l_nm]);
+				for ($j=0;$j<sizeof($lkkey);$j++) {if (strpos(strtolower($lklist[$l_nm][$lkkey[$j]]), strtolower($s_filter))!==false) {$s_arr.= ($s_arr=="" ? "":" OR ")." CONCAT(',',".$tmp_fld.",',') LIKE '%,".$lkkey[$j].",%'";}}
+				$condition="IN (-1)";
+				if ($s_arr) {$tmp_fld=""; $condition=" (".$s_arr.") ";}
+			}
+			else if ($tmp_search=="s") 		{$condition="='".$s_filter."'";}
+			else if ($tmp_search=="s%") 	{$condition="LIKE '".$s_filter."%'";}
+			else if ($tmp_search=="%s") 	{$condition="LIKE '%".$s_filter."'";}
+			else if ($tmp_search=="%s%")	{$condition="LIKE '%".$s_filter."%'";}
+
+			$sql_where.=" AND ".$tmp_fld." ".$condition;
+		}
+	}

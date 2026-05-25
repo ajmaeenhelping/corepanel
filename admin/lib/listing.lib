@@ -1,0 +1,135 @@
+<?php
+/* supported types:
+	 * - int			integer			e.g. 1,234
+	 * - dbl			double			e.g. 1,234.56
+	 * - bool			boolean			e.g. Yes, No
+	 * - memo			long text		e.g. 123\n456\n789
+	 * - sdf			date			e.g. 31-Dec-2008
+	 * - sdtf			date			e.g. 31-Dec-2008, 11:59 pm
+	 * - sdfnm			date			e.g. 31-12-2008
+	 * - stf			date			e.g. 11:59 pm
+	 * - lk_[name]		lookup			e.g. lk_cat
+	 * - lc_[name]		child link		e.g. lc_cat
+	 * - mt_[name]		multi field		e.g. mt_cat
+	 * - display_[img]	long text		e.g. display img tag <img>
+	 * - display_[thumbnail]	long text		e.g. display img tag <img>
+	 */
+?>
+<div class="table-responsive">
+	<table class="dti" cellpadding="0" cellspacing="0">
+				<tr style="border-bottom: 1px solid #ccc;">
+					<th width="30px" class="tdh">#
+						<?php
+						if ($can_d) {
+							echo "<th class='tdh' width='30px'><input type='checkbox' onclick=\"checkAll('chk_',this.checked); rewriteChk('chk_',document.fd.del_id); \">";
+						}
+						for ($i = 0; $i < sizeof($c_list); $i++) {
+							if ($c_name[$i] == "") {
+								continue;
+							}
+							if ($c_sort[$i]) {
+								$tmp_dir = "ASC";
+								$tmp_img = "";
+								if ($l_ord == $c_list[$i]) {
+									$tmp_dir = ($l_dir == "DESC" ? "ASC" : "DESC");
+									$tmp_img = "<img src='" . $img_base . ($l_dir == "DESC" ? "up.gif" : "down.gif") . "'/>";
+								}
+								echo "<th class='td " . $c_algn[$i] . "'><a href='javascript:void(0);' onclick=\"changeSort('" . $c_list[$i] . "','" . $tmp_dir . "');\" style='color:#000000;'>" . $c_name[$i] . "</a>&nbsp;&nbsp;" .
+									"<a href='javascript:void(0);' onclick=\"changeSort('" . $c_list[$i] . "','" . $tmp_dir . "');\">" . $tmp_img . "</a>";
+							} else { ?>
+					<th class="tdh"><?= $c_name[$i] ?><?php }
+											}
+											echo "</tr>";
+											if (isset($debug_select) && $debug_select == 1) {
+												echo $sql;
+												exit;
+											}
+											if ($rs_size != 0) {
+												$edit_column = str_replace(" ", "", $edit_column);
+												$edit_column = explode(",", $edit_column);
+												$rs = mq($sql);
+												while ($r = mfa($rs)) {
+													$x++;
+													$rw = "rw" . ($x % 2);
+													echo "<tr class='" . $rw . "' onmouseover=\"this.className='rw2';\" onmouseout=\"this.className='" . $rw . "';\">";
+													echo "<td class='tdm'>" . $x . "</td>";
+													if ($can_d) {
+														echo "<td class='tdm'><input type='checkbox' name='chk_" . $r[0] . "' onclick=\"rewriteChk('chk_',document.fd.del_id);\"></td>";
+													}
+													for ($i = 0; $i < sizeof($c_list); $i++) {
+														if ($c_name[$i] == "") continue;
+
+														$ajax_fld_pre = "";
+														$ajax_fld_post = "";
+														$extra_fld_pre = (isset($pre_fld[$c_list[$i]]) ? " " . $pre_fld[$c_list[$i]] : "");
+														$extra_fld_post = (isset($post_fld[$c_list[$i]]) ? " " . $post_fld[$c_list[$i]] : "");
+
+														if ($extra_fld_pre != "") {
+															$extra_fld_pre  = str_replace("#id#", $r[0], $extra_fld_pre);
+															$extra_fld_pre  = str_replace("#encid#", md5($r[0]), $extra_fld_pre);
+															$extra_fld_pre  = str_replace("#value#", $r[$i], $extra_fld_pre);
+														}
+														if ($extra_fld_post != "") {
+															$extra_fld_post = str_replace("#id#", $r[0], $extra_fld_post);
+															$extra_fld_post = str_replace("#value#", $r[$i], $extra_fld_post);
+														}
+
+														$td_fld = "<td class='td" . $c_algn[$i] . "' " . (isset($nowrap[$i]) && $nowrap[$i] ? "nowrap" : "") . "  style='padding:5px 5px 5px 5px'>" . $extra_fld_pre . $ajax_fld_pre;
+														if (in_array($c_list[$i], $edit_column)) {
+															$td_fld .= "<a href='#' onclick='editRec(" . $r[0] . ")'>";
+														}
+
+														$tmp_c = $c_type[$i];
+														if ($tmp_c == "") {
+															$td_fld .= $r[$i];
+														} else if ($tmp_c == "int") {
+															$td_fld .= dfi($r[$i]);
+														} else if ($tmp_c == "dbl") {
+															$td_fld .= dfd($r[$i]);
+														} else if ($tmp_c == "dbs") {
+															$td_fld .= dfs($r[$i]);
+														} else if ($tmp_c == "bool") {
+															$td_fld .= ($r[$i] ? "Yes" : "No");
+														} else if ($tmp_c == "memo") {
+															$td_fld .= lnbr($r[$i]);
+														} else if ($tmp_c == "sdf") {
+															$td_fld .= (isnulldate($r[$i]) ? "-" : sdf($r[$i]));
+														} else if ($tmp_c == "sdtf") {
+															$td_fld .= (isnulldate($r[$i]) ? "-" : sdtf($r[$i]));
+														} else if ($tmp_c == "sdfnm") {
+															$td_fld .= (isnulldate($r[$i]) ? "-" : sdfnm($r[$i]));
+														} else if ($tmp_c == "stf") {
+															$td_fld .= stf($r[$i]);
+														} else if (strpos($tmp_c, "lk_") !== false && strpos($tmp_c, "lk_") < 1) {
+															$tmp_arr = explode("_", $tmp_c);
+															$td_fld .= $lklist[$tmp_arr[1]][$r[$i]];
+														} else if (strpos($tmp_c, "lc_") !== false && strpos($tmp_c, "lc_") < 1) {
+															$tmp_arr = explode("_", $tmp_c);
+															$n = (isset($lklist[$tmp_arr[1]][$r[0]]) ? $lklist[$tmp_arr[1]][$r[0]] : 0);
+															$extra_fld_post .= "<input type='button' class='btn-4 bg-primary' style='font-weight:bold;' onclick=\"go('" . str_replace("#id#", $r[0], $lc_link[$c_list[$i]]) . "');\" value='View (" . $n . ")'>";
+														} else if (strpos($tmp_c, "mt_") !== false && strpos($tmp_c, "mt_") < 1) {
+															$tmp_arr = explode("_", $tmp_c);
+															$akey = array_keys($lklist[$tmp_arr[1]]);
+															for ($l = 0; $l < sizeof($akey); $l++) {
+																$extra_fld_post .= (strpos("," . $r[$i] . ",", $akey[$l] . "") !== false ? $lklist[$tmp_arr[1]][$akey[$l]] . "<br>" : "");
+															}
+														}
+														else if (strpos($tmp_c,"display_")!==false && strpos($tmp_c,"lk_")<1) {
+															$tmp_arr = explode("_",$tmp_c);
+															if($r[$tmp_arr[1]]!="") {$td_fld.="<img style='width:80px' src=\"".$r[$tmp_arr[1]]."\" />";}
+															else {$td_fld.="<img style='width:80px' src='emptyimg.png' />";};
+														}
+														if (in_array($c_list[$i], $edit_column)) {
+															$td_fld .= "</a>";
+														}
+														$td_fld .= $ajax_fld_post . $extra_fld_post . "</td>";
+														echo $td_fld;
+													}
+													echo "</tr>";
+												}
+											} else {
+												echo "<tr><td class='tdm rw1' colspan='" . $l_col . "' class='m'>--- No records found ---</td>";
+											}
+													?>
+		</table>
+</div>

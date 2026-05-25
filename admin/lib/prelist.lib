@@ -1,0 +1,27 @@
+<?php
+	//fetch page size
+	$rs_size=0;
+	$sql_table_x = (isset($sql_table_join) ? $sql_table_join:"");
+	$sql = "SELECT ".$c_list[0]." FROM ".$sql_table." ".$sql_table_x." ".$sql_where;
+
+	$rs = mq($sql);
+	if ($rs) {$rs_size = mnr($rs);}
+	$l_tpg = ceil($rs_size/$l_rpp);
+	if ($l_tpg==0) $l_tpg=1;
+
+	$l_col = 1;
+	for ($i=0;$i<sizeof($c_name);$i++) {if ($c_name[$i]!="") $l_col++;}
+	if ($can_d) $l_col++;
+
+	$x=0;
+	$x+=(($l_pgn-1)*$l_rpp);
+
+	//fetch data
+	$sql_fld = "";
+	for ($i=0;$i<sizeof($c_list);$i++) {
+		if ($c_list[$i]=="" || substr($c_list[$i],0,2)=="__") continue;
+		$sql_fld.=($sql_fld!="" ? ",":"").$c_list[$i];
+	}
+	$sql_fld = "SELECT ".$sql_fld." FROM ";
+	$sql = $sql_fld." ".$sql_table." ".$sql_table_x." ".$sql_where." ".$sql_order." ".$sql_limit;
+?>

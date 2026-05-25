@@ -1,0 +1,14 @@
+<?php
+			if (!isint($id)) exit;
+			$sql = "SELECT * FROM ".$sql_table." WHERE id=".clean($id);
+			$rs = mq($sql);
+			if ($r = mfa($rs)) {
+				for ($i=0;$i<sizeof($p_list);$i++) {
+					if ($p_list[$i]=="" || substr($p_list[$i],0,2)=="__") continue;
+					$v = $r[$p_list[$i]];
+					if ((strlen($p_type[$i])>=4 && (substr($p_type[$i],0,4)=="date")) || ((strlen($p_type[$i])>=5 && substr($p_type[$i],0,5)=="datex"))) {$v=rvd($v);}
+					$p[$p_list[$i]]=$v;
+				}
+				if (isset($log_audit["v"]) && $log_audit["v"]) {$log_info = "SELECT ".$sql_table." (".$r[$edit_column].")"; require "auditlog.lib";}
+			}
+?>

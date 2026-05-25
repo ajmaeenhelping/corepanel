@@ -1,0 +1,8 @@
+</div><!-- /login-card -->
+
+<?php for ($i = 0; $i < sizeof($js_file_footer); $i++): ?>
+    <script src="<?= $js_base . $js_file_footer[$i] ?>"></script>
+<?php endfor; ?>
+
+</body>
+</html>

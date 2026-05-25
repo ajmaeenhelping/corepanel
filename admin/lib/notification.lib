@@ -1,0 +1,17 @@
+<?php
+if (get("update") != "") { $update = get("update"); set("update", ""); }
+if (get("error")  != "") { $error  = get("error");  set("error",  ""); }
+
+if (!empty($update)): ?>
+    <div class="noti-success">
+        <i class="fas fa-check-circle" style="margin-top:2px;flex-shrink:0;"></i>
+        <div><div class="noti-title">Success</div><?= $update ?></div>
+    </div>
+<?php endif;
+
+if (!empty($error)): ?>
+    <div class="noti-error">
+        <i class="fas fa-exclamation-circle" style="margin-top:2px;flex-shrink:0;"></i>
+        <div><div class="noti-title">Error</div><?= $error ?></div>
+    </div>
+<?php endif; ?>
