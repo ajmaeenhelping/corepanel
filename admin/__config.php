@@ -9,11 +9,11 @@ if (file_exists($_shared_config)) {
     $mysqli_username = "root";
     $mysqli_password = "12345678";
     $mysqli_schema   = "blank";
-    $site_name       = "Blank 4";
-    $site_email      = "noreply@localhost.com";
+    $site_name       = "CorePanel";
+    $site_email      = "noreply@corepanel.com";
     $site_url        = "../admin";
-    $company_name    = "Blank4";
-    $company_url     = "blank4.com";
+    $company_name    = "CorePanel";
+    $company_url     = "corepanel.com";
     $host_domain     = "localhost";
     $host_key        = "c021d994a66d45363ab679052e0d5915";
 }
