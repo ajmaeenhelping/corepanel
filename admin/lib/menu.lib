@@ -75,11 +75,11 @@ endfor;
                 <?php endforeach; ?>
             </div>
             <div class="topbar-divider"></div>
-            <a href="<?= $site_url ?>/setup.php" class="topbar-action">
+            <a href="setup.php" class="topbar-action">
                 <i class="fas fa-cog"></i><span><?= t('nav.settings') ?></span>
             </a>
             <div class="topbar-divider"></div>
-            <a href="<?= $site_url ?>/logout.php" class="topbar-action">
+            <a href="logout.php" class="topbar-action">
                 <i class="fas fa-sign-out-alt"></i><span><?= t('nav.logout') ?></span>
             </a>
         </div>

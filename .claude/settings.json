@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(awk 'NR==78 || NR==82' '/Users/iqhwanajmaeen/Documents/Codes/RS Admin/Basic/admin/lib/menu.lib')",
+      "Bash(perl -i -pe 's{<a href=\"<\\\\?= \\\\$site_url \\\\?>/setup\\\\.php\" class=\"topbar-action\">}{<a href=\"setup.php\" class=\"topbar-action\">}g; s{<a href=\"<\\\\?= \\\\$site_url \\\\?>/logout\\\\.php\" class=\"topbar-action\">}{<a href=\"logout.php\" class=\"topbar-action\">}g' '/Users/iqhwanajmaeen/Documents/Codes/RS Admin/Basic/admin/lib/menu.lib')",
+      "Bash(awk 'NR>=76 && NR<=85' '/Users/iqhwanajmaeen/Documents/Codes/RS Admin/Basic/admin/lib/menu.lib')"
+    ]
+  }
+}
