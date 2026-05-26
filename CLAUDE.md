@@ -57,6 +57,7 @@ Basic/
 | `page` | CMS static page content |
 | `demo` | Full-featured demo/showcase table |
 | `itm` | Items linked to categories (FK → cat) |
+| `product` | Products linked to categories (FK → cat) — slug, name, cat_id, price, stock |
 | `email_template` | Email templates used by `sendMail()` |
 | `schema_migrations` | Migration tracking |
 

@@ -14,6 +14,7 @@ $mn_flux = array(
 	"",					"__group",			"nav.content",			"",
 	"",					"banner.php",		"nav.banners",			"fas fa-flag",
 	"",					"cat.php",			"nav.categories",		"fas fa-list",
+	"",					"product.php",		"nav.products",			"fas fa-box",
 	"",					"page.php",			"nav.pages",			"fas fa-file",
 	"",					"demo.php",			"nav.demo",				"fas fa-desktop",
 	// "",				"multi.php",		"nav.multi",			"fas fa-layer-group",

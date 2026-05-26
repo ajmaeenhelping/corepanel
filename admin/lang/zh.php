@@ -8,6 +8,7 @@ return [
     'nav.content'        => '内容',
     'nav.banners'        => '横幅',
     'nav.categories'     => '分类',
+    'nav.products'       => '产品',
     'nav.pages'          => '页面',
     'nav.demo'           => '示例',
     'nav.administration' => '管理',
